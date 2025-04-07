@@ -1,4 +1,4 @@
-import { User } from "../models/user.model";
+import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
 import { generateToken } from "../utils/generateToken.js";
 
@@ -29,6 +29,7 @@ export const register = async (req, res) => {
         )
 
     } catch (error) {
+        console.log(error);
         return res.status(500).json({
             success: false,
             message: "failed to register"

@@ -14,6 +14,10 @@ const Login = () => {
     email: "",
     password: ""
   })
+  const isFormIncomplete = isLogin
+  ? !loginInput.email || !loginInput.password
+  : !signupInput.name || !signupInput.email || !signupInput.password;
+
 
   const [registerUser, {
     data: registerData,
@@ -156,7 +160,7 @@ const Login = () => {
                 initial="initial"
                 animate="animate"
               >
-                {/* Input fields with enhanced animations */}
+                
                 {!isLogin && (
                   <motion.div
                     variants={fadeIn}
@@ -229,6 +233,7 @@ const Login = () => {
                       hover:-translate-y-0.5 
                       transition-all duration-200
                       focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      disabled={isFormIncomplete || (isLogin ? loginLoading : registerLoading)}
                   >
                     {isLogin ? 'Login ' : 'Create Account'}
                   </Button>

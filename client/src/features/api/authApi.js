@@ -9,6 +9,10 @@ export const authApi = createApi({
     baseQuery: fetchBaseQuery({
         baseUrl:USER_API,
         credentials: 'include',
+        prepareHeaders: (headers) => {
+            return headers;
+
+          } 
     }),
     endpoints:(builder)=>({
         registerUser:builder.mutation({

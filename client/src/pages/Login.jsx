@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Button } from '../components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useLoginUserMutation, useRegisterUserMutation } from '@/features/api/authApi'
 
 const Login = () => {
   const [isLogin, setIsLogin] = useState(true)
@@ -13,6 +14,19 @@ const Login = () => {
     email: "",
     password: ""
   })
+
+  const [registerUser, {
+    data: registerData,
+    error: registerError,
+    isLoading: registerLoading,
+    isSuccess: registerSuccess 
+  }] = useRegisterUserMutation();
+
+  const [loginUser, {
+    data: loginData,
+    error: loginError,
+    isLoading: loginLoading,
+    isSuccess: loginSuccess}] = useLoginUserMutation();
 
   const changeHandler = (e) => {
     const { name, value } = e.target
@@ -28,17 +42,22 @@ const Login = () => {
       }))
     }
   }
-  
-  const handleSubmit = (e) => {
-    e.preventDefault()
+
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
     if (isLogin) {
-      console.log('Login Data:', loginInput)
-      // Add your login logic here
+      const res = await loginUser(loginInput).unwrap();
+      console.log("Login Success:", res);
     } else {
-      console.log('Signup Data:', signupInput)
-      // Add your signup logic here
+      const res = await registerUser(signupInput).unwrap();
+      console.log("Register Success:", res);
     }
+  } catch (err) {
+    console.error("API Error:", err);
   }
+};
+
 
   const fadeIn = {
     initial: { opacity: 0, y: 20 },
@@ -54,7 +73,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 transition-all duration-700">
-      <motion.div 
+      <motion.div
         variants={fadeIn}
         initial="initial"
         animate="animate"
@@ -79,10 +98,10 @@ const Login = () => {
                     layoutId="activeTab"
                     className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl"
                     style={{ zIndex: -1 }}
-                    transition={{ 
-                      type: "spring", 
-                      stiffness: 500, 
-                      damping: 30 
+                    transition={{
+                      type: "spring",
+                      stiffness: 500,
+                      damping: 30
                     }}
                   />
                 )}
@@ -99,15 +118,15 @@ const Login = () => {
             initial="initial"
             animate="animate"
             exit="exit"
-            transition={{ 
-              type: "spring", 
-              stiffness: 300, 
-              damping: 30 
+            transition={{
+              type: "spring",
+              stiffness: 300,
+              damping: 30
             }}
             className="space-y-6"
           >
             <div className="text-center space-y-2">
-              <motion.h2 
+              <motion.h2
                 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -115,20 +134,20 @@ const Login = () => {
               >
                 {isLogin ? 'Welcome Back' : 'Join Us'}
               </motion.h2>
-              <motion.p 
+              <motion.p
                 className="text-sm text-gray-600"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.3 }}
               >
-                {isLogin 
-                  ? "We're glad to see you again" 
+                {isLogin
+                  ? "We're glad to see you again"
                   : "Begin your journey with us"}
               </motion.p>
             </div>
 
             <form className="space-y-6" onSubmit={handleSubmit}>
-              <motion.div 
+              <motion.div
                 className="space-y-4"
                 variants={{
                   initial: { opacity: 0 },
@@ -139,7 +158,7 @@ const Login = () => {
               >
                 {/* Input fields with enhanced animations */}
                 {!isLogin && (
-                  <motion.div 
+                  <motion.div
                     variants={fadeIn}
                     className="group"
                   >
@@ -161,7 +180,7 @@ const Login = () => {
                   </motion.div>
                 )}
 
-                <motion.div 
+                <motion.div
                   variants={fadeIn}
                   className="group"
                 >
@@ -179,7 +198,7 @@ const Login = () => {
                   />
                 </motion.div>
 
-                <motion.div 
+                <motion.div
                   variants={fadeIn}
                   className="group"
                 >

@@ -112,7 +112,7 @@ useEffect(() => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 transition-all duration-700 p-4 mt-6">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 transition-all duration-700 p-4 absolute top-8 left-0 right-0 ">
       <motion.div
         variants={containerVariants}
         initial="initial"

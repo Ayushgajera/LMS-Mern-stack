@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+  const user=true;
 
   return (
     <nav className="bg-white shadow-lg fixed w-full top-0 z-50">
@@ -18,7 +19,7 @@ function Navbar() {
             </div>
             
             {/* Desktop Navigation */}
-            <div className="hidden md:ml-6 md:flex md:space-x-8">
+            {/* <div className="hidden md:ml-6 md:flex md:space-x-8">
               <Link to="/courses" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 transition-colors duration-300">
                 Courses
               </Link>
@@ -38,7 +39,7 @@ function Navbar() {
               <Link to="/about" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 transition-colors duration-300">
                 About
               </Link>
-            </div>
+            </div> */}
           </div>
 
           {/* Right Side Menu */}
@@ -58,7 +59,7 @@ function Navbar() {
                 >
                   <img
                     className="h-8 w-8 rounded-full"
-                    src="https://source.unsplash.com/random/100x100?face"
+                    src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
                     alt="User"
                   />
                 </button>

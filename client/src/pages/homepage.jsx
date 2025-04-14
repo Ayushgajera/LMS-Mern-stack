@@ -60,21 +60,8 @@ function Homepage() {
   return (
     <div className="bg-gray-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-500 to-cyan-400 py-24 text-white relative overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-10"></div>
-        <div className="container mx-auto px-4 relative">
-          <div className="animate-fade-in">
-            <h1 className="text-6xl font-bold mb-4 leading-tight">
-              Transform Your Life <br />Through Learning
-            </h1>
-            <p className="text-xl mb-8 max-w-2xl">
-              Join millions of learners worldwide and explore your creativity, build valuable skills, and gain certification in top-demand fields.
-            </p>
-            <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-8 rounded-lg transition duration-300 transform hover:scale-105">
-              Get Started For Free
-            </button>
-          </div>
-
+      <div className="bg-gradient-to-r from-blue-500 to-cyan-400  text-white relative overflow-hidden">
+       
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
             <div className="bg-white bg-opacity-10 rounded-lg p-6 text-center">
@@ -92,13 +79,7 @@ function Homepage() {
               <h2 className="text-3xl font-bold">50,000+</h2>
               <p>Students</p>
             </div>
-            <div className="bg-white bg-opacity-10 rounded-lg p-6 text-center">
-              <svg className="w-12 h-12 mx-auto mb-4" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/>
-              </svg>
-              <h2 className="text-3xl font-bold">200+</h2>
-              <p>Instructors</p>
-            </div>
+            
           </div>
         </div>
       </div>

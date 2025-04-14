@@ -154,16 +154,7 @@ function Homepage() {
                 <p className="text-gray-600 mb-2">
                   by {course.instructor}
                 </p>
-                <div className="flex items-center mb-2">
-                  <div className="flex text-yellow-400">
-                    {[...Array(5)].map((_, i) => (
-                      <svg key={i} className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
-                      </svg>
-                    ))}
-                  </div>
-                  <span className="ml-2 text-gray-600">({course.rating})</span>
-                </div>
+                
                 <p className="text-gray-600 mb-4">
                   {course.students.toLocaleString()} students
                 </p>

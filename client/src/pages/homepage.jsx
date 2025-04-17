@@ -185,20 +185,7 @@ function Homepage() {
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="font-bold text-lg mb-4">About Us</h3>
-              <p className="text-gray-400">
-                We're on a mission to transform lives through education.
-              </p>
-            </div>
-            {/* Add more footer columns here */}
-          </div>
-        </div>
-      </footer>
+     
     </div>
   );
 }

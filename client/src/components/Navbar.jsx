@@ -1,79 +1,269 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { FiSearch, FiBookOpen, FiGrid, FiUser, FiBell, FiLogOut, FiEdit2, FiSettings } from 'react-icons/fi';
+import { FiBook, FiAward, FiBarChart2, FiHeart, FiDownload, FiCalendar, FiMessageSquare } from 'react-icons/fi';
+
+const menuItems = [
+  {
+    to: "/dashboard",
+    icon: <FiBarChart2 className="w-4 h-4 text-green-600" />,
+    label: "Dashboard",
+    bgColor: "bg-green-100"
+  },
+  {
+    to: "/my-courses",
+    icon: <FiBook className="w-4 h-4 text-emerald-600" />,
+    label: "My Courses",
+    bgColor: "bg-emerald-100",
+    badge: {
+      content: "3",
+      className: "px-2 py-0.5 text-xs bg-green-100 text-green-600 rounded-full"
+    }
+  },
+  {
+    to: "/messages",
+    icon: <FiMessageSquare className="w-4 h-4 text-green-600" />,
+    label: "Messages",
+    bgColor: "bg-green-100",
+    badge: {
+      content: "",
+      className: "h-2 w-2 bg-red-500 rounded-full"
+    }
+  },
+  {
+    to: "/calendar",
+    icon: <FiCalendar className="w-4 h-4 text-emerald-600" />,
+    label: "Calendar",
+    bgColor: "bg-emerald-100"
+  },
+  
+];
 
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
-  const user=true;
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
+  const user = true;
+
+  // Handle navbar background on scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   return (
-    <nav className="bg-white shadow-lg fixed w-full top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${
+      isScrolled || isMenuOpen ? 'bg-white/95 backdrop-blur-md shadow-md' : 'bg-transparent'
+    }`}>
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo and Main Nav */}
-          <div className="flex">
-            <div className="flex-shrink-0 flex items-center">
-              <Link to="/" className="text-2xl font-bold text-blue-600">
+          <div className="flex items-center">
+            <Link to="/" className="flex items-center space-x-2">
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent"
+              >
                 EduLearn
-              </Link>
-            </div>
-            
+              </motion.div>
+            </Link>
+
             {/* Desktop Navigation */}
-            {/* <div className="hidden md:ml-6 md:flex md:space-x-8">
-              <Link to="/courses" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 transition-colors duration-300">
+            <div className="hidden md:flex items-center ml-8 space-x-1">
+              <NavLink to="/courses">
+                <FiBookOpen className="mr-2" />
                 Courses
-              </Link>
+              </NavLink>
+
               <div className="relative group">
-                <button className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 transition-colors duration-300">
+                <NavLink className="group">
+                  <FiGrid className="mr-2" />
                   Categories
-                  <svg className="ml-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="ml-1 h-4 w-4 transition-transform duration-200 group-hover:rotate-180" 
+                    fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                   </svg>
-                </button>
-                <div className="absolute left-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300">
-                  <Link to="/category/development" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Development</Link>
-                  <Link to="/category/business" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Business</Link>
-                  <Link to="/category/design" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Design</Link>
-                </div>
+                </NavLink>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="absolute left-0 mt-2 w-56 bg-white rounded-xl shadow-lg py-2 invisible group-hover:visible opacity-0 group-hover:opacity-100 transition-all duration-200"
+                >
+                  {['Web Development', 'Design', 'Business', 'Marketing'].map((category) => (
+                    <Link
+                      key={category}
+                      to={`/category/${category.toLowerCase()}`}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-green-50 hover:text-green-600 transition-colors duration-200"
+                    >
+                      {category}
+                    </Link>
+                  ))}
+                </motion.div>
               </div>
-              <Link to="/about" className="inline-flex items-center px-1 pt-1 text-sm font-medium text-gray-700 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 transition-colors duration-300">
-                About
-              </Link>
-            </div> */}
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <div className="hidden md:flex items-center flex-1 max-w-md mx-2 lg:mx-4">
+            <div className="relative w-full">
+              <input
+                type="text"
+                placeholder="Search courses..."
+                className="w-full px-4 py-2 pl-10 pr-4 rounded-xl border border-gray-200 
+                  focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
+                  bg-gray-50/50 backdrop-blur-sm transition-all duration-200"
+              />
+              <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            </div>
           </div>
 
           {/* Right Side Menu */}
-          <div className="hidden md:flex items-center">
-            <div className="flex-shrink-0">
-              <button className="relative inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-                Get Started
-              </button>
-            </div>
-            
+          <div className="hidden md:flex items-center space-x-4">
+            {/* Notifications */}
+            <button className="relative p-2 text-gray-600 hover:text-green-600 transition-colors duration-200">
+              <FiBell className="h-6 w-6" />
+              <span className="absolute top-0 right-0 h-2 w-2 rounded-full bg-red-500"></span>
+            </button>
+
             {/* Profile Dropdown */}
-            <div className="ml-4 relative flex-shrink-0">
-              <div>
-                <button 
-                  onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
-                  className="bg-white rounded-full flex text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                >
-                  <img
-                    className="h-8 w-8 rounded-full"
-                    src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-                    alt="User"
-                  />
-                </button>
-              </div>
-              
-              {isProfileDropdownOpen && (
-                <div className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5">
-                  <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Your Profile</Link>
-                  <Link to="/settings" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</Link>
-                  <button className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                    Sign out
-                  </button>
+            <div className="relative">
+              <button 
+                onClick={() => setIsProfileDropdownOpen(!isProfileDropdownOpen)}
+                className="flex items-center space-x-3 p-1.5 rounded-xl hover:bg-gray-100/80 
+                  transition-all duration-200 border border-transparent hover:border-gray-200"
+              >
+                <img
+                  className="h-9 w-9 rounded-full ring-2 ring-green-500 object-cover"
+                  src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=1480&auto=format&fit=crop"
+                  alt="User"
+                />
+                <div className="text-left">
+                  <span className="text-sm font-medium text-gray-700 group-hover:text-green-600">John Doe</span>
+                  <p className="text-xs text-gray-500">Student</p>
                 </div>
-              )}
+              </button>
+
+              <AnimatePresence>
+                {isProfileDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="fixed right-4 mt-2 w-[320px] bg-white rounded-2xl shadow-xl py-3 border border-gray-100 
+                      profile-dropdown overflow-y-auto z-[100]"
+                    style={{
+                      maxHeight: 'calc(100vh - 80px)',
+                      top: '64px'
+                    }}
+                  >
+                    {/* User Info Section - Enhanced */}
+                    <div className="px-4 py-3">
+                      <div className="flex items-start space-x-4">
+                        <div className="relative group">
+                          <img
+                            className="h-16 w-16 rounded-xl ring-2 ring-green-500/30 object-cover group-hover:ring-green-500 transition-all duration-200"
+                            src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=1480&auto=format&fit=crop"
+                            alt="User"
+                          />
+                          <button className="absolute -bottom-2 -right-2 p-1.5 rounded-full bg-green-500 text-white 
+                            shadow-lg hover:bg-green-600 transition-colors duration-200">
+                            <FiEdit2 className="w-3 h-3" />
+                          </button>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="text-base font-semibold text-gray-800">John Doe</h4>
+                          <p className="text-sm text-gray-500">john@example.com</p>
+                          <div className="mt-2">
+                            <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
+                              <span>Student Level</span>
+                              <span>Level 4</span>
+                            </div>
+                            <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                              <div className="h-full bg-gradient-to-r from-green-500 to-emerald-400 w-[85%]" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Quick Stats - Enhanced */}
+                    <div className="grid grid-cols-3 gap-1 px-3 ">
+                      <div className="flex flex-col items-center p-2 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
+                        <div className="bg-green-100 p-2 rounded-lg">
+                          <FiBook className="w-3 h-3 text-green-600" />
+                        </div>
+                        <p className="text-md font-semibold text-gray-800">12</p>
+                        <p className="text-xs text-gray-500">Courses</p>
+                      </div>
+                      <div className="flex flex-col items-center p-2 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
+                        <div className="bg-emerald-100 p-2 rounded-lg">
+                          <FiBarChart2 className="w-3 h-3 text-emerald-600" />
+                        </div>
+                        <p className="text-md font-semibold text-gray-800">85%</p>
+                        <p className="text-xs text-gray-500">Progress</p>
+                      </div>
+                      <div className="flex flex-col items-center p-2 rounded-xl hover:bg-gray-50 transition-colors cursor-pointer">
+                        <div className="bg-green-100 p-2 rounded-lg ">
+                          <FiAward className="w-3 h-3 text-green-600" />
+                        </div>
+                        <p className="text-md font-semibold text-gray-800">8</p>
+                        <p className="text-xs text-gray-500">Certificates</p>
+                      </div>
+                    </div>
+
+                    {/* Menu Items - Enhanced */}
+                    <div className="px-2 ">
+                      {menuItems.map((item, index) => (
+                        <Link
+                          key={index}
+                          to={item.to}
+                          className="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm text-gray-700
+                            hover:bg-gray-50 hover:text-green-600 transition-all duration-200"
+                        >
+                          <div className={`p-2 rounded-lg ${item.bgColor}`}>
+                            {item.icon}
+                          </div>
+                          <span className="flex-1">{item.label}</span>
+                          {item.badge && (
+                            <span className={item.badge.className}>
+                              {item.badge.content}
+                            </span>
+                          )}
+                        </Link>
+                      ))}
+                    </div>
+
+                    {/* Footer Actions - Enhanced */}
+                    <div className="border-t border-gray-100 mt-2 pt-2 px-2">
+                      <Link
+                        to="/settings"
+                        className="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm text-gray-700
+                          hover:bg-gray-50 hover:text-green-600 transition-all duration-200"
+                      >
+                        <div className="p-2 rounded-lg bg-gray-100">
+                          <FiSettings className="w-4 h-4" />
+                        </div>
+                        <span>Settings</span>
+                      </Link>
+                      <button
+                        className="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm text-red-600 w-full
+                          hover:bg-red-50 hover:text-red-700 transition-all duration-200"
+                      >
+                        <div className="p-2 rounded-lg bg-red-100">
+                          <FiLogOut className="w-4 h-4" />
+                        </div>
+                        <span>Sign out</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
 
@@ -81,23 +271,18 @@ function Navbar() {
           <div className="flex items-center md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-blue-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500"
+              className="p-2 rounded-lg text-gray-600 hover:text-green-600 hover:bg-gray-100 
+                focus:outline-none focus:ring-2 focus:ring-inset focus:ring-green-500"
             >
-              <svg
-                className={`${isMenuOpen ? 'hidden' : 'block'} h-6 w-6`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+              <svg className={`${isMenuOpen ? 'hidden' : 'block'} h-6 w-6`} fill="none" 
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                  d="M4 6h16M4 12h16M4 18h16" />
               </svg>
-              <svg
-                className={`${isMenuOpen ? 'block' : 'hidden'} h-6 w-6`}
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              <svg className={`${isMenuOpen ? 'block' : 'hidden'} h-6 w-6`} fill="none" 
+                viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
+                  d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
@@ -105,36 +290,140 @@ function Navbar() {
       </div>
 
       {/* Mobile menu */}
-      <div className={`${isMenuOpen ? 'block' : 'hidden'} md:hidden`}>
-        <div className="pt-2 pb-3 space-y-1">
-          <Link to="/courses" className="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">
-            Courses
-          </Link>
-          <Link to="/categories" className="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">
-            Categories
-          </Link>
-          <Link to="/about" className="block pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:text-blue-600 hover:bg-gray-50">
-            About
-          </Link>
-        </div>
-        <div className="pt-4 pb-3 border-t border-gray-200">
-          <div className="flex items-center px-4">
-            <div className="flex-shrink-0">
-              <img
-                className="h-10 w-10 rounded-full"
-                src="https://source.unsplash.com/random/100x100?face"
-                alt="User"
-              />
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="md:hidden fixed inset-x-0 top-16 bg-white border-t border-gray-100 shadow-lg"
+          >
+            {/* Mobile Search */}
+            <div className="p-4 border-b border-gray-100">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search courses..."
+                  className="w-full px-4 py-2 pl-10 pr-4 rounded-xl border border-gray-200 
+                    focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent
+                    bg-gray-50/50"
+                />
+                <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              </div>
             </div>
-            <div className="ml-3">
-              <div className="text-base font-medium text-gray-800">User Name</div>
-              <div className="text-sm font-medium text-gray-500">user@example.com</div>
+
+            {/* Mobile Navigation */}
+            <div className="px-4 py-3 space-y-1">
+              <Link to="/courses" className="mobile-nav-link">
+                <FiBookOpen className="w-5 h-5" />
+                <span>Courses</span>
+              </Link>
+
+              {/* Mobile Categories Accordion */}
+              <div className="space-y-2">
+                <button 
+                  onClick={() => setIsCategoryOpen(!isCategoryOpen)}
+                  className="mobile-nav-link w-full flex justify-between"
+                >
+                  <div className="flex items-center">
+                    <FiGrid className="w-5 h-5" />
+                    <span>Categories</span>
+                  </div>
+                  <svg 
+                    className={`w-5 h-5 transition-transform duration-200 ${
+                      isCategoryOpen ? 'rotate-180' : ''
+                    }`} 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke="currentColor"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                
+                <AnimatePresence>
+                  {isCategoryOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      className="pl-9 space-y-1"
+                    >
+                      {['Web Development', 'Design', 'Business', 'Marketing'].map((category) => (
+                        <Link
+                          key={category}
+                          to={`/category/${category.toLowerCase()}`}
+                          className="block py-2 text-sm text-gray-600 hover:text-green-600"
+                        >
+                          {category}
+                        </Link>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Mobile Menu Items */}
+              {menuItems.map((item, index) => (
+                <Link
+                  key={index}
+                  to={item.to}
+                  className="mobile-nav-link"
+                >
+                  <div className={`p-2 rounded-lg ${item.bgColor}`}>
+                    {item.icon}
+                  </div>
+                  <span>{item.label}</span>
+                  {item.badge && (
+                    <span className={`ml-auto ${item.badge.className}`}>
+                      {item.badge.content}
+                    </span>
+                  )}
+                </Link>
+              ))}
             </div>
-          </div>
-        </div>
-      </div>
+
+            {/* Mobile User Section */}
+            <div className="border-t border-gray-100 px-4 py-4">
+              <div className="flex items-center space-x-3 mb-4">
+                <img
+                  src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=1480&auto=format&fit=crop"
+                  alt="User"
+                  className="h-12 w-12 rounded-full ring-2 ring-green-500"
+                />
+                <div>
+                  <h4 className="text-sm font-semibold text-gray-800">John Doe</h4>
+                  <p className="text-xs text-gray-500">john@example.com</p>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <Link to="/settings" className="mobile-nav-link">
+                  <FiSettings className="w-5 h-5" />
+                  <span>Settings</span>
+                </Link>
+                <button className="mobile-nav-link w-full text-red-600 hover:text-red-700 hover:bg-red-50">
+                  <FiLogOut className="w-5 h-5" />
+                  <span>Sign out</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }
+
+// Helper component for nav links
+const NavLink = ({ children, to, className = "" }) => (
+  <Link
+    to={to}
+    className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-700 
+      hover:text-green-600 hover:bg-green-50 transition-colors duration-200 ${className}`}
+  >
+    {children}
+  </Link>
+);
 
 export default Navbar;

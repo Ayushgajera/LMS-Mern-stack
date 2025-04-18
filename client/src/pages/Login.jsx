@@ -112,41 +112,46 @@ useEffect(() => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-100 via-purple-50 to-pink-100 transition-all duration-700 p-4 absolute top-8 left-0 right-0 ">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 via-gray-50 to-emerald-50 transition-all duration-700 p-4 mt-6">
       <motion.div
         variants={containerVariants}
         initial="initial"
         animate="animate"
-        className="max-w-md w-full m-4 p-6 bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl 
-          hover:shadow-3xl transition-all duration-300 overflow-hidden"
+        className="max-w-md w-full m-4 p-6 bg-white/95 backdrop-blur-lg rounded-2xl shadow-lg 
+          border border-gray-100
+          hover:shadow-xl hover:shadow-green-100/50 transition-all duration-300 overflow-hidden"
       >
         {/* Toggle Switch */}
-        <div className="flex justify-center mb-6">
-          <div className="bg-gray-100/80 p-1.5 rounded-2xl flex gap-2 shadow-inner">
+        <div className="flex justify-center mb-8">
+          <div className="bg-gray-100/80 p-1.5 rounded-2xl flex gap-1 shadow-inner border border-gray-200/50 backdrop-blur-sm">
             {["Login", "Sign Up"].map((type) => (
               <motion.button
                 key={type}
                 onClick={() => setIsLogin(type === "Login")}
-                className={`relative px-8 py-2.5 rounded-xl text-sm font-medium transition-colors duration-200
+                className={`relative px-10 py-2.5 rounded-xl text-sm font-medium 
+                  transition-colors duration-200 select-none
                   ${(type === "Login" && isLogin) || (type === "Sign Up" && !isLogin)
                     ? 'text-white'
                     : 'text-gray-500 hover:text-gray-700'}`}
-                whileHover={{ scale: 1.03 }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 {((type === "Login" && isLogin) || (type === "Sign Up" && !isLogin)) && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl"
-                    style={{ zIndex: -1 }}
+                    className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-400 rounded-xl shadow-md"
+                    initial={false}
                     transition={{
                       type: "spring",
-                      stiffness: 500,
+                      stiffness: 400,
                       damping: 30
+                    }}
+                    style={{ 
+                      zIndex: -1,
                     }}
                   />
                 )}
-                {type}
+                <span className="relative z-10">{type}</span>
               </motion.button>
             ))}
           </div>
@@ -166,10 +171,10 @@ useEffect(() => {
               variants={fadeIn}
               className="text-center space-y-1"
             >
-              <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600">
+              <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-500">
                 {isLogin ? 'Welcome Back' : 'Join Us'}
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-gray-600">
                 {isLogin ? "We're glad to see you again" : "Begin your journey with us"}
               </p>
             </motion.div>
@@ -193,10 +198,11 @@ useEffect(() => {
                       value={signupInput.name}
                       onChange={changeHandler}
                       className="block w-full px-4 py-2.5 border border-gray-200 rounded-xl 
-                        bg-white/50 backdrop-blur-sm
+                        bg-gray-50/30 backdrop-blur-sm
                         transition-all duration-200 
-                        focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                        group-hover:border-gray-300"
+                        focus:ring-2 focus:ring-green-500 focus:border-transparent
+                        group-hover:border-green-200
+                        text-gray-700 placeholder-gray-400"
                       placeholder="Enter your name"
                     />
                   </motion.div>
@@ -212,10 +218,11 @@ useEffect(() => {
                     value={isLogin ? loginInput.email : signupInput.email}
                     onChange={changeHandler}
                     className="block w-full px-4 py-2.5 border border-gray-200 rounded-xl 
-                      bg-white/50 backdrop-blur-sm
+                      bg-gray-50/30 backdrop-blur-sm
                       transition-all duration-200 
-                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                      group-hover:border-gray-300"
+                      focus:ring-2 focus:ring-green-500 focus:border-transparent
+                      group-hover:border-green-200
+                      text-gray-700 placeholder-gray-400"
                     placeholder="email@example.com"
                   />
                 </motion.div>
@@ -229,10 +236,11 @@ useEffect(() => {
                     value={isLogin ? loginInput.password : signupInput.password}
                     onChange={changeHandler}
                     className="block w-full px-4 py-2.5 border border-gray-200 rounded-xl 
-                      bg-white/50 backdrop-blur-sm
+                      bg-gray-50/30 backdrop-blur-sm
                       transition-all duration-200 
-                      focus:ring-2 focus:ring-indigo-500 focus:border-transparent
-                      group-hover:border-gray-300"
+                      focus:ring-2 focus:ring-green-500 focus:border-transparent
+                      group-hover:border-green-200
+                      text-gray-700 placeholder-gray-400"
                     placeholder="••••••••"
                   />
                 </motion.div>
@@ -245,13 +253,14 @@ useEffect(() => {
               >
                 <Button
                   type="submit"
-                  className="w-full py-2.5 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 
+                  className="w-full py-2.5 px-4 bg-gradient-to-r from-green-600 to-emerald-500 
                     text-white rounded-xl font-medium 
-                    shadow-lg shadow-indigo-200/50 
-                    hover:shadow-xl hover:shadow-indigo-300/50 
+                    shadow-lg shadow-green-100 
+                    hover:shadow-xl hover:shadow-green-200/50 
                     hover:-translate-y-0.5 
                     transition-all duration-200
-                    disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled:opacity-50 disabled:cursor-not-allowed
+                    disabled:hover:shadow-none disabled:hover:translate-y-0"
                   disabled={isFormIncomplete || (isLogin ? loginLoading : registerLoading)}
                 >
                   {isLogin 

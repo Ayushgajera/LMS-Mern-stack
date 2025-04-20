@@ -5,14 +5,16 @@ import Homepage from "./pages/homepage"
 import Login from "./pages/Login"
 import HeroSection from "./pages/student/herosection"
 import ProfilePage from "./pages/student/profilepage"
+import Sellerdashboard from "./pages/teacher/sellerdashboard"
 function App() {
   return (
     <>
     
-    <Navbar/>
+    {/* <Navbar/> */}
     {/* <HeroSection/> */}
     {/* <ProfilePage/> */}
-    <AdminProfilePage/>
+    {/* <AdminProfilePage/> */}
+    <Sellerdashboard/>
     {/* <Login /> */}
     </>
       // <Homepage/>

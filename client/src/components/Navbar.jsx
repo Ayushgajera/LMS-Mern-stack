@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiBookOpen, FiGrid, FiUser, FiBell, FiLogOut, FiEdit2, FiSettings } from 'react-icons/fi';
 import { FiBook, FiAward, FiBarChart2, FiHeart, FiDownload, FiCalendar, FiMessageSquare } from 'react-icons/fi';
 
 const menuItems = [
   {
-    to: "/dashboard",
+    to: "/profile",
     icon: <FiBarChart2 className="w-4 h-4 text-green-600" />,
-    label: "Dashboard",
+    label: "profile",
     bgColor: "bg-green-100"
   },
   {
@@ -46,6 +46,8 @@ function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
   const user = true;
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Handle navbar background on scroll
   useEffect(() => {
@@ -56,8 +58,41 @@ function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Add effect to close menus on route change
+  useEffect(() => {
+    setIsProfileDropdownOpen(false);
+    setIsMenuOpen(false);
+  }, [location.pathname]);
+
+  // Modify the menu item click handler
+  const handleMenuItemClick = (path) => {
+    navigate(path);
+    setIsProfileDropdownOpen(false);
+    setIsMenuOpen(false);
+  };
+
+  // Update the menu items rendering in profile dropdown
+  const renderMenuItems = menuItems.map((item, index) => (
+    <button
+      key={index}
+      onClick={() => handleMenuItemClick(item.to)}
+      className="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm text-gray-700
+        hover:bg-gray-50 hover:text-green-600 transition-all duration-200 w-full text-left"
+    >
+      <div className={`p-2 rounded-lg ${item.bgColor}`}>
+        {item.icon}
+      </div>
+      <span className="flex-1">{item.label}</span>
+      {item.badge && (
+        <span className={item.badge.className}>
+          {item.badge.content}
+        </span>
+      )}
+    </button>
+  ));
+
   return (
-    <nav className={`fixed w-full top-0 z-50 transition-all duration-300 ${
+    <nav className={`fixed w-full top-0 z-50 transition-all duration-300  ${
       isScrolled || isMenuOpen ? 'bg-white/95 backdrop-blur-md shadow-md' : 'bg-transparent'
     }`}>
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
@@ -65,7 +100,8 @@ function Navbar() {
           {/* Logo and Main Nav */}
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <motion.div
+            <FiBook className="w-8 h-8 text-emerald-600" />
+               <motion.div
                 initial={{ scale: 0.5, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 className="text-2xl font-bold bg-gradient-to-r from-green-600 to-emerald-500 bg-clip-text text-transparent"
@@ -218,25 +254,8 @@ function Navbar() {
                     </div>
 
                     {/* Menu Items - Enhanced */}
-                    <div className="px-2 ">
-                      {menuItems.map((item, index) => (
-                        <Link
-                          key={index}
-                          to={item.to}
-                          className="flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm text-gray-700
-                            hover:bg-gray-50 hover:text-green-600 transition-all duration-200"
-                        >
-                          <div className={`p-2 rounded-lg ${item.bgColor}`}>
-                            {item.icon}
-                          </div>
-                          <span className="flex-1">{item.label}</span>
-                          {item.badge && (
-                            <span className={item.badge.className}>
-                              {item.badge.content}
-                            </span>
-                          )}
-                        </Link>
-                      ))}
+                    <div className="px-2">
+                      {renderMenuItems}
                     </div>
 
                     {/* Footer Actions - Enhanced */}
@@ -416,14 +435,23 @@ function Navbar() {
 }
 
 // Helper component for nav links
-const NavLink = ({ children, to, className = "" }) => (
-  <Link
-    to={to}
-    className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-700 
-      hover:text-green-600 hover:bg-green-50 transition-colors duration-200 ${className}`}
-  >
-    {children}
-  </Link>
-);
+const NavLink = ({ children, to, className = "" }) => {
+  const navigate = useNavigate();
+  
+  const handleClick = (e) => {
+    e.preventDefault();
+    navigate(to);
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-700 
+        hover:text-green-600 hover:bg-green-50 transition-colors duration-200 ${className}`}
+    >
+      {children}
+    </button>
+  );
+};
 
 export default Navbar;

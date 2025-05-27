@@ -11,11 +11,8 @@ createRoot(document.getElementById('root')).render(
   
    
  <Provider store={appStore}>
-   <BrowserRouter>
     <App />
     <Toaster/>
-   
-   </BrowserRouter>
  </Provider>
   
 )

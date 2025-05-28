@@ -42,7 +42,36 @@ export const authApi = createApi({
                     }
                 } 
         }),
+        loaduser: builder.query({
+            query: () => ({
+                url: "profile",
+                method: 'GET'
+            })
+        }),
+        updatedUser: builder.mutation({
+            query: (inputData) => ({
+                url: "profile/update",
+                method: 'PUT',
+                body: inputData,
+                credentials: 'include',
+            }),
+            async onQueryStarted(_, { queryFulfilled, dispatch }) {
+                try {
+                    const result = await queryFulfilled;
+                    dispatch(userLoggedIn({ user: result.data.user }));
+                } catch (error) {
+                    console.log(error);
+                }
+            }
+        }),
+        logoutUser: builder.query({
+            query: () => ({
+                url: "logout",
+                method: 'GET'
+            }),
+
+        })
     })
 })
 //build in hooks created by rtk query   
-export const {useRegisterUserMutation,useLoginUserMutation} = authApi;
+export const {useRegisterUserMutation,useLoginUserMutation,useLoaduserQuery,useLogoutUserQuery,useUpdatedUserMutation} = authApi;

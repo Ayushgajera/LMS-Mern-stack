@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { FiClock, FiUsers, FiBookOpen } from 'react-icons/fi';
 import Courses from './Courses';
+import Course from './Course';
 
 const HeroSection = () => {
 
@@ -106,7 +107,7 @@ const HeroSection = () => {
         </motion.div>
 
         
-        {/* courses */}
+       
           <Courses  />
   
 

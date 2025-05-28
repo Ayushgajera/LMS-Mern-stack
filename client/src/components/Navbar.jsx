@@ -49,6 +49,7 @@ function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  
   // Handle navbar background on scroll
   useEffect(() => {
     const handleScroll = () => {

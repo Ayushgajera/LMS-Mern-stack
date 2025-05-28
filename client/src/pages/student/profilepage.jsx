@@ -6,6 +6,8 @@ import {
 } from 'react-icons/fi';
 import EditProfile from './EditProfile';
 import { toast } from 'sonner'
+import { useLoaduserQuery} from '@/features/api/authApi';
+
 
 const ProfilePage = () => {
   const [activeTab, setActiveTab] = useState('courses');
@@ -41,18 +43,23 @@ const ProfilePage = () => {
       }));
       setIsEditing(false);
       // Show success message
-     toast.success('Profile updated successfully!');
+     
     } catch (error) {
-      // Show error message
-      
-      toast.error('Failed to update profile. Please try again.');
+      console.error('Error saving profile:', error);
+
     }
   };
 
   const handleCancelEdit = () => {
     setIsEditing(false);
   };
-
+  const { data, isLoading } = useLoaduserQuery();
+  // console.log(data);
+  if(isLoading){
+    return <h1>profile is Loading</h1>
+  }
+ const {user}=data;
+ console.log(user);
   return (
     <>
       <div className="min-h-screen bg-gray-50 mt-18">
@@ -63,7 +70,7 @@ const ProfilePage = () => {
               {/* Avatar */}
               <div className="relative">
                 <img
-                  src={userProfile.avatar}
+                  src={user.photoUrl || userProfile.avatar}
                   alt={userProfile.name}
                   className="w-24 h-24 rounded-full border-4 border-purple-100"
                 />
@@ -75,13 +82,13 @@ const ProfilePage = () => {
 
               {/* Basic Info */}
               <div className="flex-1 text-center sm:text-left">
-                <h1 className="text-2xl font-bold text-gray-900 mb-1">{userProfile.name}</h1>
-                <p className="text-gray-600 mb-4">{userProfile.role}</p>
+                <h1 className="text-2xl font-bold text-gray-900 mb-1">{user.name}</h1>
+                <p className="text-gray-600 mb-4">{user.role.toUpperCase()}</p>
                 <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4">
-                  <a href={`mailto:${userProfile.email}`}
+                  <a href={`mailto:${user.email}`}
                     className="flex items-center gap-2 text-gray-600 hover:text-purple-600">
                     <FiMail className="w-4 h-4" />
-                    <span>{userProfile.email}</span>
+                    <span>{user.email}</span>
                   </a>
                   <div className="flex items-center gap-2">
                     <a href={userProfile.socialLinks.linkedin}
@@ -96,7 +103,7 @@ const ProfilePage = () => {
                 </div>
               </div>
 
-              <button 
+              <button
                 onClick={handleEditProfile}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium
                   hover:bg-purple-700 transition-colors duration-200"
@@ -160,7 +167,12 @@ const ProfilePage = () => {
           {activeTab === 'courses' && (
             <div className="grid gap-6">
               <div className="text-center text-gray-600">
-                Your enrolled courses will appear here
+                {user.enrolledCourses.length == 0 ? (
+                   
+                  <p className="text-lg font-medium">You are not enrolled in any courses yet.</p>
+                ) : (
+                  <p>You are enrolled in courses.</p>
+                )}
               </div>
             </div>
           )}

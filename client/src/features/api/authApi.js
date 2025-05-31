@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { userLoggedIn } from '../authslice';
+import { userLoggedIn, userLoggedOut } from '../authslice';
 
 const USER_API = 'http://localhost:8000/api/v1/user/';
 
@@ -46,7 +46,20 @@ export const authApi = createApi({
             query: () => ({
                 url: "profile",
                 method: 'GET'
-            })
+            }),
+            async onQueryStarted(_,{queryFulfilled,dispatch})
+                {
+                    console.log("loaduser API call started"); 
+                    try {
+                        //queryFUlfilled used to store data from the server(recieved response from backend)
+                        const result = await queryFulfilled;
+                        dispatch(userLoggedIn({user:result.data.user}));
+                        
+                    } catch (error) {
+                        console.log(error)
+
+                    }
+                } 
         }),
         updatedUser: builder.mutation({
             query: (inputData) => ({
@@ -64,14 +77,25 @@ export const authApi = createApi({
                 }
             }
         }),
-        logoutUser: builder.query({
+        logoutUser: builder.mutation({
             query: () => ({
                 url: "logout",
                 method: 'GET'
             }),
+            async onQueryStarted(_,{queryFulfilled,dispatch})
+                {
+                    try {
+                        
+                        dispatch(userLoggedOut());
+                        
+                    } catch (error) {
+                        console.log(error)
+
+                    }
+                } 
 
         })
     })
 })
 //build in hooks created by rtk query   
-export const {useRegisterUserMutation,useLoginUserMutation,useLoaduserQuery,useLogoutUserQuery,useUpdatedUserMutation} = authApi;
+export const {useRegisterUserMutation,useLoginUserMutation,useLoaduserQuery,useLogoutUserMutation,useUpdatedUserMutation} = authApi;

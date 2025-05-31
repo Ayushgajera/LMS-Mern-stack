@@ -17,6 +17,7 @@ const Login = () => {
     email: "",
     password: ""
   })
+  
   const isFormIncomplete = isLogin
   ? !loginInput.email || !loginInput.password
   : !signupInput.name || !signupInput.email || !signupInput.password;
@@ -28,7 +29,6 @@ const Login = () => {
     isLoading: registerLoading,
     isSuccess: registerSuccess 
   }] = useRegisterUserMutation({
-    refetchOnMountOrArgChange: true
   });
 
   const [loginUser, {
@@ -36,7 +36,7 @@ const Login = () => {
     error: loginError,
     isLoading: loginLoading,
     isSuccess: loginSuccess}] = useLoginUserMutation({
-      refetchOnMountOrArgChange: true
+      
     });
  
   const changeHandler = (e) => {
@@ -56,10 +56,10 @@ const Login = () => {
   const navigate=useNavigate()
  const handleSubmit = async (e) => {
   e.preventDefault();
-  try {
-    if (isLogin) {
-      const res = await loginUser(loginInput).unwrap();
-      console.log("Login Success:", res);
+    try {
+      if (isLogin) {
+        const res = await loginUser(loginInput).unwrap();
+        console.log("Login Success:", res);
     } else {
       const res = await registerUser(signupInput).unwrap();
       console.log("Register Success:", res);

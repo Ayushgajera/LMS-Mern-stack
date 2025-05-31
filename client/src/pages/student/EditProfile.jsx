@@ -3,13 +3,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { FiX, FiCamera, FiUpload, FiAlertCircle } from "react-icons/fi";
 import { useUpdatedUserMutation } from "@/features/api/authApi";
 import { toast } from "sonner";
+import { useDispatch, useSelector } from "react-redux";
 
 const EditProfile = ({ userProfile, onSave, onCancel }) => {
   const fileInputRef = useRef(null);
+  const userData = useSelector((state) => state.auth.user);
 
+  // Initialize form data with user data
   const [formData, setFormData] = useState({
-    name: userProfile?.name || "",
-    email: userProfile?.email || "",
+    name: userData?.name || "",
+    email: userData?.email || "",
     profilephoto: null,
   });
 
@@ -18,6 +21,17 @@ const EditProfile = ({ userProfile, onSave, onCancel }) => {
   const [isDragging, setIsDragging] = useState(false);
 
   const [updatedUser, { data: updateUserdata, isLoading }] = useUpdatedUserMutation();
+
+  // Add effect to sync form data with userData changes
+  useEffect(() => {
+    if (userData) {
+      setFormData(prev => ({
+        ...prev,
+        name: userData.name || "",
+        email: userData.email || "",
+      }));
+    }
+  }, [userData]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -31,30 +45,38 @@ const EditProfile = ({ userProfile, onSave, onCancel }) => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleImageUpload = async (e) => {
+    try {
+      const file = e.target.files?.[0];
+      if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("File size should be less than 5MB");
-      return;
-    }
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
 
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please upload an image file");
-      return;
-    }
+      // Validate file size (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("File size should be less than 5MB");
+        return;
+      }
 
-    setFormData((prev) => ({ ...prev, profilephoto: file }));
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+      if (!validTypes.includes(file.type)) {
+        toast.error("Please upload a valid image (JPEG, PNG)");
+        return;
+      }
 
-    const reader = new FileReader();
-    reader.onload = (ev) => setAvatarPreview(ev.target.result);
-    reader.onerror = () => toast.error("Failed to read file. Try another image.");
-    reader.readAsDataURL(file);
+      // Create preview URL
+      const objectUrl = URL.createObjectURL(file);
+      setAvatarPreview(objectUrl);
+      setFormData(prev => ({ ...prev, profilephoto: file }));
 
-    // Allow re-selection of the same file again
-    if (fileInputRef.current) {
-      fileInputRef.current.value = null;
+    } catch (error) {
+      console.error('Image upload error:', error);
+      toast.error("Failed to process image");
+      setAvatarPreview(userProfile?.photoUrl || "/placeholder.jpg");
     }
   };
 
@@ -89,20 +111,27 @@ const EditProfile = ({ userProfile, onSave, onCancel }) => {
         payload.append("profilephoto", formData.profilephoto);
       }
 
-      await updatedUser(payload).unwrap();
-      toast.success("Profile updated successfully!");
+      const result = await updatedUser(payload).unwrap();
+      if (result.success) {
+        toast.success("Profile updated successfully!");
+        onSave(result.user);
+      }
     } catch (err) {
       toast.error(err.data?.message || "Failed to update profile");
       console.error("Profile update error:", err);
     }
   };
 
+  // Add cleanup effect for image preview URLs
   useEffect(() => {
-    if (updateUserdata?.success) {
-      onSave(updateUserdata.user);
-    }
-  }, [updateUserdata, onSave]);
+    return () => {
+      if (avatarPreview && avatarPreview.startsWith('blob:')) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
 
+  // Update form inputs to use formData instead of userData
   return (
     <AnimatePresence>
       <motion.div
@@ -143,7 +172,7 @@ const EditProfile = ({ userProfile, onSave, onCancel }) => {
               <div className="relative group">
                 <img
                   src={avatarPreview}
-                  alt={formData.name || "avatar"}
+                  alt={userData.name || "avatar"}
                   className="w-32 h-32 rounded-full object-cover border-4 border-gray-200 group-hover:border-purple-200 transition-all"
                 />
                 <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">

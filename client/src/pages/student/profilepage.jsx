@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
   FiBook, FiAward, FiClock, FiBarChart2,
@@ -28,38 +28,43 @@ const ProfilePage = () => {
       github: 'https://github.com/johndoe'
     }
   });
+  const { data, isLoading, refetch } = useLoaduserQuery();
 
   const handleEditProfile = () => {
     setIsEditing(true);
   };
 
-  const handleSaveProfile = (updatedProfile) => {
+  const handleSaveProfile = async (updatedProfile) => {
     try {
-      // Merge the updated profile with existing stats
       setUserProfile(prev => ({
         ...prev,
         ...updatedProfile,
-        learningStats: prev.learningStats // Preserve learning stats
+        learningStats: prev.learningStats
       }));
       setIsEditing(false);
-      // Show success message
-     
+      
+      // Refetch user data to get the updated profile
+      await refetch();
+      toast.success("Profile updated successfully");
     } catch (error) {
       console.error('Error saving profile:', error);
-
+      toast.error("Failed to refresh profile data");
     }
   };
 
   const handleCancelEdit = () => {
     setIsEditing(false);
   };
-  const { data, isLoading } = useLoaduserQuery();
+  
+  useEffect(() => {
+    refetch();
+  }, [data]); // Only depend on data changes
   // console.log(data);
-  if(isLoading){
+  if(isLoading){ 
     return <h1>profile is Loading</h1>
   }
  const {user}=data;
- console.log(user);
+//  console.log(user);
   return (
     <>
       <div className="min-h-screen bg-gray-50 mt-18">
@@ -70,14 +75,12 @@ const ProfilePage = () => {
               {/* Avatar */}
               <div className="relative">
                 <img
+                  key={user?.photoUrl} // Add this key to force re-render when photoUrl changes
                   src={user.photoUrl || userProfile.avatar}
                   alt={userProfile.name}
-                  className="w-24 h-24 rounded-full border-4 border-purple-100"
+                  className="w-36 h-36 rounded-full border-4 border-purple-100"
                 />
-                <button className="absolute -bottom-1 -right-1 p-1.5 bg-purple-600 text-white rounded-full 
-                  hover:bg-purple-700 transition-colors duration-200">
-                  <FiEdit className="w-4 h-4" />
-                </button>
+              
               </div>
 
               {/* Basic Info */}

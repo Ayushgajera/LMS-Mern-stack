@@ -1,19 +1,19 @@
-import { StrictMode, use } from 'react'
+import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
 import { Provider, useSelector } from 'react-redux'
-import { appStore } from './app/store'
+import { appStore, persistor } from './app/store'
+import { PersistGate } from 'redux-persist/integration/react'
 import { Toaster } from './components/ui/sonner'
-import { BrowserRouter } from 'react-router-dom'
 import { useLoaduserQuery } from './features/api/authApi'
 import Loader from './components/Loader'
 
 const Custom = ({ children }) => {
-  const isLoggedIn = useSelector(state => state.auth.userLoggedIn);  // apne store ke hisaab se adjust karo
+  const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
 
   const { data: user, isLoading } = useLoaduserQuery(undefined, {
-    skip: !isLoggedIn  // jab logged in nahi to query ko skip karo
+    skip: !isAuthenticated
   });
 
   if (isLoading) return <Loader />;
@@ -22,13 +22,12 @@ const Custom = ({ children }) => {
 };
 
 createRoot(document.getElementById('root')).render(
-
-
-   <Provider store={appStore}>
+  <Provider store={appStore}>
+    <PersistGate loading={<Loader />} persistor={persistor}>
       <Custom>
-         <App />
-         <Toaster />
+        <App />
+        <Toaster />
       </Custom>
-   </Provider>
-
+    </PersistGate>
+  </Provider>
 )

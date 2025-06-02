@@ -17,7 +17,7 @@ const Login = () => {
     email: "",
     password: ""
   })
-  
+
   const isFormIncomplete = isLogin
   ? !loginInput.email || !loginInput.password
   : !signupInput.name || !signupInput.email || !signupInput.password;
@@ -59,6 +59,8 @@ const Login = () => {
     try {
       if (isLogin) {
         const res = await loginUser(loginInput).unwrap();
+        navigate('/'); // Redirect to homepage or dashboard
+
         console.log("Login Success:", res);
     } else {
       const res = await registerUser(signupInput).unwrap();
@@ -78,7 +80,7 @@ useEffect(() => {
   }
   if (loginSuccess && loginData) {
     toast.success("Login successful! Welcome back.");
-    navigate('/'); // Redirect to homepage or dashboard
+    
   }
   if(loginError) {
     toast.error( "Login failed. Please check your credentials.");

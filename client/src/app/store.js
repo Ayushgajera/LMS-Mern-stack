@@ -3,15 +3,14 @@ import { persistStore, persistReducer } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
 import rootreducer from "./rootReducer";
 import { authApi } from "@/features/api/authApi";
+import { courseApi } from "@/features/api/courseApi";
 
-// Configure persist options
 const persistConfig = {
   key: 'root',
   storage,
-  whitelist: ['auth'] // Only persist auth reducer
+  whitelist: ['auth']
 };
 
-// Create persisted reducer
 const persistedReducer = persistReducer(persistConfig, rootreducer);
 
 export const appStore = configureStore({
@@ -21,17 +20,24 @@ export const appStore = configureStore({
         serializableCheck: {
           ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE']
         }
-      }).concat([authApi.middleware]),
+      }).concat([
+        authApi.middleware,
+        courseApi.middleware
+      ]),
 });
 
 export const persistor = persistStore(appStore);
 
+// Modified initializeApp function with proper state access and error handling
 const initializeApp = async () => {
-  const state = appStore.getState();
-  const isAuthenticated = state.auth.isAuthenticated;
-
-  if(isAuthenticated) {
-    await appStore.dispatch(authApi.endpoints.loaduser.initiate(undefined, { forceRefetch: true }));
+  try {
+    const state = appStore.getState();
+    // Check if auth state exists and has isAuthenticated property
+    if (state?.auth?.isAuthenticated) {
+      await appStore.dispatch(authApi.endpoints.loaduser.initiate(undefined, { forceRefetch: true }));
+    }
+  } catch (error) {
+    console.error('Failed to initialize app:', error);
   }
 };
 

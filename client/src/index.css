@@ -122,7 +122,7 @@
     @apply bg-background text-foreground;
   }
 }
-  
+
 /* Add to your global.css or index.css */
 .mobile-nav-link {
   @apply flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm text-gray-700
@@ -133,5 +133,83 @@
   .mobile-nav-link {
     @apply w-full;
   }
+}
+
+/* Add these styles for the rich text editor */
+.ProseMirror {
+  > * + * {
+    margin-top: 0.75em;
+  }
+
+  ul,
+  ol {
+    padding: 0 1rem;
+  }
+
+  ul {
+    list-style-type: disc;
+  }
+
+  ol {
+    list-style-type: decimal;
+  }
+
+  h1 {
+    font-size: 2em;
+    font-weight: bold;
+  }
+
+  h2 {
+    font-size: 1.5em;
+    font-weight: bold;
+  }
+
+  h3 {
+    font-size: 1.25em;
+    font-weight: bold;
+  }
+
+  blockquote {
+    padding-left: 1rem;
+    border-left: 2px solid #e5e7eb;
+  }
+
+  code {
+    background-color: #f3f4f6;
+    padding: 0.2em 0.4em;
+    border-radius: 0.25em;
+  }
+
+  min-height: 200px;
+  cursor: text;
+  padding: 1rem;
+}
+
+/* TipTap Font Size Styles */
+.ProseMirror {
+  & [style*="font-size"] {
+    display: inline;
+  }
+}
+
+.ProseMirror p {
+  margin: 0;
+}
+
+/* Font size utility classes */
+[style*="font-size: 14px"] {
+  font-size: 14px !important;
+}
+
+[style*="font-size: 16px"] {
+  font-size: 16px !important;
+}
+
+[style*="font-size: 20px"] {
+  font-size: 20px !important;
+}
+
+[style*="font-size: 24px"] {
+  font-size: 24px !important;
 }
 

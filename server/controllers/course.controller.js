@@ -1,4 +1,4 @@
-import { Course } from "../models/course.model";
+import { Course } from "../models/course.model.js";
 
 export const createCourse = async (req, res) => {
     try {
@@ -45,4 +45,20 @@ export const createCourse = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
         
     }
+}
+export const getAllCourses = async (req, res) => {
+    try {
+        const UserID=req.id;
+        const courses = await Course.find({creator: UserID})
+        if (!courses || courses.length === 0) {
+            return res.status(404).json({ message: "No courses found for this user." });
+        }
+        res.status(200).json({
+            courses,
+            message: "Courses fetched successfully",
+        });
+    } catch (error) {
+        console.error("Error fetching courses:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }   
 }

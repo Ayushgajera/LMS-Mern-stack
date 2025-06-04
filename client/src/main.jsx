@@ -1,4 +1,3 @@
-import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import App from './App.jsx'
@@ -11,9 +10,11 @@ import Loader from './components/Loader'
 
 const Custom = ({ children }) => {
   const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
+  const user = useSelector(state => state.auth.user);
 
-  const { data: user, isLoading } = useLoaduserQuery(undefined, {
-    skip: !isAuthenticated
+  const { isLoading } = useLoaduserQuery(undefined, {
+    skip: !isAuthenticated || !!user, 
+    refetchOnMountOrArgChange: true // Only refetch when component mounts or arguments change
   });
 
   if (isLoading) return <Loader />;

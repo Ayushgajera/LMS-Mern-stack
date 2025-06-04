@@ -1,9 +1,12 @@
 import { combineReducers } from '@reduxjs/toolkit';
-import authReducer from '../features/authslice.js';
+import authReducer from '@/features/authslice';
 import { authApi } from '@/features/api/authApi';
+import { courseApi } from '@/features/api/courseApi';
 
-const rootreducer = combineReducers({
-    [authApi.reducerPath]: authApi.reducer,
-    auth: authReducer,
-})
-export default rootreducer;
+const rootReducer = combineReducers({
+  auth: authReducer,
+  [authApi.reducerPath]: authApi.reducer,
+  [courseApi.reducerPath]: courseApi.reducer,
+});
+
+export default rootReducer;

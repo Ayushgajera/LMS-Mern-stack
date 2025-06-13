@@ -1,11 +1,8 @@
-import Navbar from "./components/Navbar"
-import { Button } from "./components/ui/button"
-import Homepage from "./pages/homepage"
 import Login from "./pages/Login"
 import HeroSection from "./pages/student/herosection"
 import ProfilePage from "./pages/student/profilepage"
-import MainLayout from "./layout/mainLayout"
-import { createBrowserRouter, Route } from "react-router-dom"
+import MainLayout from "./layout/MainLayout"
+import { createBrowserRouter} from "react-router-dom"
 import { RouterProvider } from "react-router"
 import MyLearning from "./pages/student/MyLearning"
 import AdminLayout from "./pages/admin/AdminLayout"
@@ -67,6 +64,7 @@ const appRouter = createBrowserRouter([
   }
 ]);
 function App() {
+
   return (
     <>
       <main>

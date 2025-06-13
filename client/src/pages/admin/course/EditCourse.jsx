@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
@@ -9,6 +9,7 @@ import TextStyle from '@tiptap/extension-text-style';
 import {FontSize} from '@/extensions/FontSize'; // Assuming you have a custom FontSize extension
 import { FiSave, FiX, FiDollarSign, FiBook, FiGrid, FiImage, FiUpload, FiTarget, FiInfo, 
   FiBold, FiItalic, FiUnderline, FiAlignLeft, FiAlignCenter, FiAlignRight, FiList } from 'react-icons/fi';
+import { useEditCourseMutation, useGetAllCoursesQuery, useGetCourseByIdQuery } from '@/features/api/courseApi';
 
 function RichTextEditor({ content, onChange }) {
   const editor = useEditor({
@@ -19,16 +20,43 @@ function RichTextEditor({ content, onChange }) {
       FontSize
     ],
     content: content,
-    onUpdate: ({ editor }) => {
-      onChange(editor.getHTML());
-    },
+    editable: true,
+    autofocus: true,
     editorProps: {
       attributes: {
-        class: 'prose max-w-none p-4 min-h-[200px] focus:outline-none cursor-text'
+        class: 'prose max-w-none p-4 min-h-[200px] focus:outline-none'
+      },
+      handleDOMEvents: {
+        focus: (view, event) => {
+          // Prevent focus loss
+          event.preventDefault();
+          return false;
+        }
       }
     },
-    autofocus: 'all'
+    onUpdate: ({ editor }) => {
+      const html = editor.getHTML();
+      onChange(html);
+    }
   });
+
+  // Maintain focus state
+  const [isFocused, setIsFocused] = useState(false);
+
+  useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      const cursorPos = editor.view.state.selection.$head.pos;
+      editor.commands.setContent(content);
+      // Restore cursor position
+      editor.commands.setTextSelection(cursorPos);
+    }
+  }, [content, editor]);
+
+  // Handle focus events
+  const handleFocus = () => {
+    setIsFocused(true);
+    editor?.commands.focus();
+  };
 
   if (!editor) {
     return null;
@@ -45,8 +73,16 @@ function RichTextEditor({ content, onChange }) {
     editor.chain().focus().setFontSize(size).run()
   };
 
+  // Update button click handlers to prevent default
+  const handleButtonClick = (callback) => (e) => {
+    e.preventDefault(); // Prevent form submission
+    callback();
+  };
+
   return (
-    <div className="border rounded-xl overflow-hidden">
+    <div className={`border rounded-xl overflow-hidden ${isFocused ? 'ring-2 ring-emerald-500' : ''}`}
+      onClick={handleFocus}
+    >
       {/* Toolbar */}
       <div className="flex items-center gap-1 p-2 border-b bg-gray-50">
         {/* Font Size Selector */}
@@ -67,7 +103,8 @@ function RichTextEditor({ content, onChange }) {
         <div className="w-px h-5 bg-gray-300 mx-1" />
 
         <button
-          onClick={() => editor.chain().focus().toggleBold().run()}
+          type="button" // Add button type
+          onClick={handleButtonClick(() => editor.chain().focus().toggleBold().run())}
           className={`p-2 rounded hover:bg-gray-200 ${
             editor.isActive('bold') ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
           }`}
@@ -76,7 +113,8 @@ function RichTextEditor({ content, onChange }) {
           <FiBold className="w-4 h-4" />
         </button>
         <button
-          onClick={() => editor.chain().focus().toggleItalic().run()}
+          type="button" // Add button type
+          onClick={handleButtonClick(() => editor.chain().focus().toggleItalic().run())}
           className={`p-2 rounded hover:bg-gray-200 ${
             editor.isActive('italic') ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
           }`}
@@ -85,7 +123,8 @@ function RichTextEditor({ content, onChange }) {
           <FiItalic className="w-4 h-4" />
         </button>
         <button
-          onClick={() => editor.chain().focus().toggleUnderline().run()}
+          type="button"
+          onClick={handleButtonClick(() => editor.chain().focus().toggleUnderline().run())}
           className={`p-2 rounded hover:bg-gray-200 ${
             editor.isActive('underline') ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
           }`}
@@ -95,7 +134,8 @@ function RichTextEditor({ content, onChange }) {
         </button>
         <div className="w-px h-5 bg-gray-300 mx-1" />
         <button
-          onClick={() => editor.chain().focus().setTextAlign('left').run()}
+          type="button"
+          onClick={handleButtonClick(() => editor.chain().focus().setTextAlign('left').run())}
           className={`p-2 rounded hover:bg-gray-200 ${
             editor.isActive({ textAlign: 'left' }) ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
           }`}
@@ -104,7 +144,8 @@ function RichTextEditor({ content, onChange }) {
           <FiAlignLeft className="w-4 h-4" />
         </button>
         <button
-          onClick={() => editor.chain().focus().setTextAlign('center').run()}
+          type="button"
+          onClick={handleButtonClick(() => editor.chain().focus().setTextAlign('center').run())}
           className={`p-2 rounded hover:bg-gray-200 ${
             editor.isActive({ textAlign: 'center' }) ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
           }`}
@@ -113,7 +154,8 @@ function RichTextEditor({ content, onChange }) {
           <FiAlignCenter className="w-4 h-4" />
         </button>
         <button
-          onClick={() => editor.chain().focus().setTextAlign('right').run()}
+          type="button"
+          onClick={handleButtonClick(() => editor.chain().focus().setTextAlign('right').run())}
           className={`p-2 rounded hover:bg-gray-200 ${
             editor.isActive({ textAlign: 'right' }) ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
           }`}
@@ -137,13 +179,17 @@ function RichTextEditor({ content, onChange }) {
       <EditorContent 
         editor={editor} 
         className="prose max-w-none focus:outline-none cursor-text"
+        onFocus={handleFocus}
+        onBlur={() => setIsFocused(false)}
       />
     </div>
   );
 }
 
 function EditCourse() {
-  const { id } = useParams();
+  const params = useParams();
+  const courseId = params.courseId;
+  console.log("Course ID:", courseId);
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     courseTitle: '',
@@ -155,8 +201,29 @@ function EditCourse() {
     courseThumbnail: null,
     isPublished: false
   });
-
   const [previewUrl, setPreviewUrl] = useState('');
+  const { data: courseData, isLoading: isCourseLoading } = useGetCourseByIdQuery(courseId);
+  console.log("Course Data:", courseData);
+  const course = courseData?.course;
+  useEffect(() => {
+    if (course) {
+      console.log("Setting course description:", course.courseDescription);
+      setFormData({
+        courseTitle: course.courseTitle || '',
+        subTitle: course.subTitle || '',
+        courseDescription: course.courseDescription || '', // Ensure this is the raw HTML
+        category: course.category || '',
+        courseLevel: course.courseLevel || 'Beginner',
+        coursePrice: course.coursePrice || '',
+        courseThumbnail: null,
+        isPublished: course.isPublished || false
+      });
+      if (course.courseThumbnail) {
+        setPreviewUrl(course.courseThumbnail);
+      }
+    }
+  }, [course]);
+  const [editCourse,{data,isLoading,isSuccess}]=useEditCourseMutation(courseId);
 
   const courseLevels = ['Beginner', 'Intermediate', 'Advanced'];
   const categories = [
@@ -186,17 +253,47 @@ function EditCourse() {
     }
   };
 
-//   const handleSubmit = async (e) => {
-//     e.preventDefault();
-//     try {
-//       await updateCourse({ id, ...formData }).unwrap();
-//       toast.success('Course updated successfully');
-//       navigate('/admin/courses');
-//     } catch (error) {
-//       toast.error(error.data?.message || 'Failed to update course');
-//     }
-//   };
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { courseTitle, subTitle, courseDescription, category, courseLevel, coursePrice, courseThumbnail, isPublished } = formData;
 
+    // Prepare form data for submission
+    const formDataToSubmit = new FormData();
+    formDataToSubmit.append('courseId', courseId);
+    formDataToSubmit.append('courseTitle', courseTitle);
+    formDataToSubmit.append('subTitle', subTitle);
+    formDataToSubmit.append('courseDescription', courseDescription);
+    formDataToSubmit.append('category', category);
+    formDataToSubmit.append('courseLevel', courseLevel);
+    formDataToSubmit.append('coursePrice', coursePrice);
+    if (courseThumbnail) {
+      formDataToSubmit.append('courseThumbnail', courseThumbnail);
+    }
+    formDataToSubmit.append('isPublished', isPublished);
+
+    try {
+      await editCourse({formData:formDataToSubmit,courseId }).unwrap();
+      toast.success("Course updated successfully!");
+      navigate('/admin/courses');
+    } catch (error) {
+      toast.error("Failed to update course. Please try again.");
+      console.error("Edit Course Error:", error);
+    }
+  }
+  // Handle success state
+  if (isSuccess) {
+    toast.success("Course updated successfully!");
+    navigate('/admin/courses');
+  }
+  // Handle loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-600"></div>
+      </div>
+    );      
+
+}
   
 
   return (
@@ -217,7 +314,7 @@ function EditCourse() {
             </div>
             <div className="flex items-center gap-3">
               <Link
-                to={`/admin/courses/${id}/lectures`}
+                to={`/admin/courses/${courseId}/lectures`}
                 className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2.5 
                   bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 
                   transition-colors duration-200 font-medium"
@@ -334,7 +431,7 @@ function EditCourse() {
                 Course Description
               </label>
               <RichTextEditor
-                content={formData.courseDescription}
+                content={formData.courseDescription || ''} // Remove the default text
                 onChange={(content) => {
                   setFormData(prev => ({
                     ...prev,
@@ -459,7 +556,8 @@ function EditCourse() {
             >
               Cancel
             </button>
-            <button
+            <button onClick={handleSubmit}
+              disabled={isLoading}
               type="submit"
               className="inline-flex items-center px-4 py-2 border border-transparent 
                 rounded-xl shadow-sm text-sm font-medium text-white bg-emerald-600 

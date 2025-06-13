@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation, NavLink as RouterNavLink } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiBookOpen, FiGrid, FiUser, FiBell, FiLogOut, FiEdit2, FiSettings } from 'react-icons/fi';
 import { FiBook, FiAward, FiBarChart2, FiHeart, FiDownload, FiCalendar, FiMessageSquare } from 'react-icons/fi';
@@ -42,6 +42,18 @@ const menuItems = [
 
 ];
 
+// Add this utility function at the top of your file
+function throttle(func, limit) {
+  let inThrottle;
+  return function(...args) {
+    if (!inThrottle) {
+      func.apply(this, args);
+      inThrottle = true;
+      setTimeout(() => inThrottle = false, limit);
+    }
+  }
+}
+
 function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -51,7 +63,7 @@ function Navbar() {
   const location = useLocation();
   const [logoutUser, { data, isLoading }] = useLogoutUserMutation();
   const userData = useSelector((state) => state.auth.user);
-  console.log(userData)
+  // console.log(userData);
 
   const handleLogout = async () => {
     try {
@@ -59,15 +71,20 @@ function Navbar() {
       navigate('/login');
     } catch (error) {
       console.error("Logout failed:", error);
+      // Add error toast here if you have a toast system
     }
   }
   // Handle navbar background on scroll
   useEffect(() => {
-    const handleScroll = () => {
+    const handleScroll = throttle(() => {
       setIsScrolled(window.scrollY > 20);
+    }, 100); // Only run every 100ms
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Add effect to close menus on route change
@@ -330,7 +347,7 @@ function Navbar() {
               </NavLink>
 
               <div className="relative group">
-                <NavLink className="group">
+                <NavLink to="/categories" className="group">
                   <FiGrid className="mr-2" />
                   Categories
                   <svg className="ml-1 h-4 w-4 transition-transform duration-200 group-hover:rotate-180"
@@ -500,21 +517,18 @@ function Navbar() {
 
 // Helper component for nav links
 const NavLink = ({ children, to, className = "" }) => {
-  const navigate = useNavigate();
-
-  const handleClick = (e) => {
-    e.preventDefault();
-    navigate(to);
-  };
-
   return (
-    <button
-      onClick={handleClick}
-      className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-700 
-        hover:text-green-600 hover:bg-green-50 transition-colors duration-200 ${className}`}
+    <RouterNavLink
+      to={to}
+      className={({ isActive }) => `
+        flex items-center px-3 py-2 rounded-lg text-sm font-medium
+        ${isActive ? 'text-green-600 bg-green-50' : 'text-gray-700'} 
+        hover:text-green-600 hover:bg-green-50 transition-colors duration-200 
+        ${className}
+      `}
     >
       {children}
-    </button>
+    </RouterNavLink>
   );
 };
 

@@ -63,7 +63,10 @@ function Navbar() {
   const location = useLocation();
   const [logoutUser, { data, isLoading }] = useLogoutUserMutation();
   const userData = useSelector((state) => state.auth.user);
-  // console.log(userData);
+  const {isAuthenticated } = useSelector((state) => state.auth);
+
+  console.log(userData);
+  console.log(isAuthenticated)
 
   const handleLogout = async () => {
     try {
@@ -122,7 +125,7 @@ function Navbar() {
 
   // Right side menu renderer
   const renderAuthButtons = () => {
-    if (userData) {
+    if (userData&&isAuthenticated) {
       return (
         <div className="hidden md:flex items-center space-x-4">
           {/* Notifications */}

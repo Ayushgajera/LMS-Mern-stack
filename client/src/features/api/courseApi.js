@@ -17,7 +17,7 @@ export const courseApi = createApi({
         }
     }),
     endpoints: (builder) => ({
-       
+
         createCourse: builder.mutation({
             query: ({ courseTitle, category }) => ({
                 url: "",
@@ -35,10 +35,10 @@ export const courseApi = createApi({
 
         }),
         editCourse: builder.mutation({
-            query: ({formData,courseId}) => ({
+            query: ({ formData, courseId }) => ({
                 url: `edit/${courseId}`,
                 method: 'PUT',
-                body:formData
+                body: formData
             }),
             invalidatesTags: ['Refetch_Creator_Course']
         }),
@@ -48,8 +48,24 @@ export const courseApi = createApi({
                 method: 'GET'
             }),
             providesTags: ['Refetch_Creator_Course']
-        })
+        }),
+        createLectures: builder.mutation({
+            query: ({ lectureTitle, courseId }) => ({
+                url: `${courseId}/lectures`,
+                method: 'POST',
+                body: { lectureTitle }
+            }),
+            invalidatesTags: ['Refetch_Creator_Course']
+        }),
+        getAllLectures: builder.query({
+            query: (courseId) => ({
+                url: `${courseId}/lectures`,
+                method: 'get',
+            }),
+            providesTags: ['Refetch_Creator_Course']
+        }),
+
     })
 })
 //build in hooks created by rtk query   
-export const { useCreateCourseMutation, useGetAllCoursesQuery,useEditCourseMutation,useGetCourseByIdQuery } = courseApi;
+export const { useCreateCourseMutation, useGetAllCoursesQuery, useEditCourseMutation, useGetCourseByIdQuery, useCreateLecturesMutation ,useGetAllLecturesQuery} = courseApi;

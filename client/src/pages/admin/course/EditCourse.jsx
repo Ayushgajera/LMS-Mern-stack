@@ -6,9 +6,11 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextStyle from '@tiptap/extension-text-style';
-import {FontSize} from '@/extensions/FontSize'; // Assuming you have a custom FontSize extension
-import { FiSave, FiX, FiDollarSign, FiBook, FiGrid, FiImage, FiUpload, FiTarget, FiInfo, 
-  FiBold, FiItalic, FiUnderline, FiAlignLeft, FiAlignCenter, FiAlignRight, FiList } from 'react-icons/fi';
+import { FontSize } from '@/extensions/FontSize'; // Assuming you have a custom FontSize extension
+import {
+  FiSave, FiX, FiDollarSign, FiBook, FiGrid, FiImage, FiUpload, FiTarget, FiInfo,
+  FiBold, FiItalic, FiUnderline, FiAlignLeft, FiAlignCenter, FiAlignRight, FiList
+} from 'react-icons/fi';
 import { useEditCourseMutation, useGetAllCoursesQuery, useGetCourseByIdQuery } from '@/features/api/courseApi';
 
 function RichTextEditor({ content, onChange }) {
@@ -105,9 +107,8 @@ function RichTextEditor({ content, onChange }) {
         <button
           type="button" // Add button type
           onClick={handleButtonClick(() => editor.chain().focus().toggleBold().run())}
-          className={`p-2 rounded hover:bg-gray-200 ${
-            editor.isActive('bold') ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
-          }`}
+          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bold') ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
+            }`}
           title="Bold"
         >
           <FiBold className="w-4 h-4" />
@@ -115,9 +116,8 @@ function RichTextEditor({ content, onChange }) {
         <button
           type="button" // Add button type
           onClick={handleButtonClick(() => editor.chain().focus().toggleItalic().run())}
-          className={`p-2 rounded hover:bg-gray-200 ${
-            editor.isActive('italic') ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
-          }`}
+          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('italic') ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
+            }`}
           title="Italic"
         >
           <FiItalic className="w-4 h-4" />
@@ -125,9 +125,8 @@ function RichTextEditor({ content, onChange }) {
         <button
           type="button"
           onClick={handleButtonClick(() => editor.chain().focus().toggleUnderline().run())}
-          className={`p-2 rounded hover:bg-gray-200 ${
-            editor.isActive('underline') ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
-          }`}
+          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('underline') ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
+            }`}
           title="Underline"
         >
           <FiUnderline className="w-4 h-4" />
@@ -136,9 +135,8 @@ function RichTextEditor({ content, onChange }) {
         <button
           type="button"
           onClick={handleButtonClick(() => editor.chain().focus().setTextAlign('left').run())}
-          className={`p-2 rounded hover:bg-gray-200 ${
-            editor.isActive({ textAlign: 'left' }) ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
-          }`}
+          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive({ textAlign: 'left' }) ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
+            }`}
           title="Align Left"
         >
           <FiAlignLeft className="w-4 h-4" />
@@ -146,9 +144,8 @@ function RichTextEditor({ content, onChange }) {
         <button
           type="button"
           onClick={handleButtonClick(() => editor.chain().focus().setTextAlign('center').run())}
-          className={`p-2 rounded hover:bg-gray-200 ${
-            editor.isActive({ textAlign: 'center' }) ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
-          }`}
+          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive({ textAlign: 'center' }) ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
+            }`}
           title="Align Center"
         >
           <FiAlignCenter className="w-4 h-4" />
@@ -156,9 +153,8 @@ function RichTextEditor({ content, onChange }) {
         <button
           type="button"
           onClick={handleButtonClick(() => editor.chain().focus().setTextAlign('right').run())}
-          className={`p-2 rounded hover:bg-gray-200 ${
-            editor.isActive({ textAlign: 'right' }) ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
-          }`}
+          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive({ textAlign: 'right' }) ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
+            }`}
           title="Align Right"
         >
           <FiAlignRight className="w-4 h-4" />
@@ -166,9 +162,8 @@ function RichTextEditor({ content, onChange }) {
         <div className="w-px h-5 bg-gray-300 mx-1" />
         <button
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`p-2 rounded hover:bg-gray-200 ${
-            editor.isActive('bulletList') ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
-          }`}
+          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bulletList') ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
+            }`}
           title="Bullet List"
         >
           <FiList className="w-4 h-4" />
@@ -176,8 +171,8 @@ function RichTextEditor({ content, onChange }) {
       </div>
 
       {/* Editor Content */}
-      <EditorContent 
-        editor={editor} 
+      <EditorContent
+        editor={editor}
         className="prose max-w-none focus:outline-none cursor-text"
         onFocus={handleFocus}
         onBlur={() => setIsFocused(false)}
@@ -202,7 +197,10 @@ function EditCourse() {
     isPublished: false
   });
   const [previewUrl, setPreviewUrl] = useState('');
-  const { data: courseData, isLoading: isCourseLoading } = useGetCourseByIdQuery(courseId);
+  //get course by id Api call
+  const { data: courseData, isLoading: isCourseLoading,error } = useGetCourseByIdQuery(courseId);
+  //edit course Api call
+  const [editCourse, { data, isLoading, isSuccess }] = useEditCourseMutation(courseId);
   console.log("Course Data:", courseData);
   const course = courseData?.course;
   useEffect(() => {
@@ -211,7 +209,7 @@ function EditCourse() {
       setFormData({
         courseTitle: course.courseTitle || '',
         subTitle: course.subTitle || '',
-        courseDescription: course.courseDescription || '', // Ensure this is the raw HTML
+        courseDescription: course.courseDescription || '',
         category: course.category || '',
         courseLevel: course.courseLevel || 'Beginner',
         coursePrice: course.coursePrice || '',
@@ -223,7 +221,6 @@ function EditCourse() {
       }
     }
   }, [course]);
-  const [editCourse,{data,isLoading,isSuccess}]=useEditCourseMutation(courseId);
 
   const courseLevels = ['Beginner', 'Intermediate', 'Advanced'];
   const categories = [
@@ -253,7 +250,7 @@ function EditCourse() {
     }
   };
 
-const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const { courseTitle, subTitle, courseDescription, category, courseLevel, coursePrice, courseThumbnail, isPublished } = formData;
 
@@ -272,7 +269,7 @@ const handleSubmit = async (e) => {
     formDataToSubmit.append('isPublished', isPublished);
 
     try {
-      await editCourse({formData:formDataToSubmit,courseId }).unwrap();
+      await editCourse({ formData: formDataToSubmit, courseId }).unwrap();
       toast.success("Course updated successfully!");
       navigate('/admin/courses');
     } catch (error) {
@@ -291,10 +288,23 @@ const handleSubmit = async (e) => {
       <div className="flex items-center justify-center h-screen">
         <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-600"></div>
       </div>
-    );      
+    );
 
-}
-  
+  }
+  if (isCourseLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600"></div>
+          <p className="text-gray-500 text-sm">
+            {isCourseLoading ? 'Loading course...' : 'Updating course...'}
+          </p>
+        </div>
+      </div>
+    );
+
+  }
+
 
   return (
     <motion.div
@@ -314,7 +324,7 @@ const handleSubmit = async (e) => {
             </div>
             <div className="flex items-center gap-3">
               <Link
-                to={`/admin/courses/${courseId}/lectures`}
+                to={`/admin/courses/edit/${courseId}/lectures`}
                 className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2.5 
                   bg-emerald-600 text-white rounded-xl hover:bg-emerald-700 
                   transition-colors duration-200 font-medium"
@@ -349,7 +359,7 @@ const handleSubmit = async (e) => {
               <FiInfo className="w-5 h-5 text-emerald-500 mr-2" />
               <h2 className="text-lg font-semibold text-gray-900">Basic Information</h2>
             </div>
-            
+
             {/* Course Title */}
             <div className="space-y-1">
               <label className="block text-sm font-medium text-gray-700">

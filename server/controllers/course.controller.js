@@ -1,5 +1,6 @@
 import { Course } from "../models/course.model.js";
 import { deleteMedia, uploadMedia } from "../utils/cloudinary.js";
+import Lecture from "../models/lecture.model.js";
 
 export const createCourse = async (req, res) => {
     try {
@@ -74,10 +75,9 @@ export const getAllCourses = async (req, res) => {
 export const editCourse = async (req, res) => {
     try {
         const courseId = req.params.courseID;
-        console.log("Course ID:", courseId);
+
         const { courseTitle, subTitle, courseDescription, category, courseLevel, coursePrice } = req.body;
         const thumbnail = req.file;
-        console.log(req.body);
 
 
         let course = await Course.findById(courseId);
@@ -123,4 +123,65 @@ export const getCourseById = async (req, res) => {
         console.error("Error fetching course:", error);
         res.status(500).json({ message: "Internal server error" });
     }
+}
+export const createLectures = async (req, res) => {
+    try {
+        const courseId = req.params.courseID;
+        const { lectureTitle } = req.body;
+        if (!courseId) {
+            return res.status(400).json({ message: "Course ID is required." });
+        }
+
+        if (!lectureTitle) {
+            return res.status(400).json({ message: "Lecture title is required." });
+        }
+        const lecture = await Lecture.create({ lectureTitle });
+        const course = await Course.findById(courseId);
+        if (course) {
+            course.lectures.push(lecture._id);
+            await course.save();
+
+        }
+
+
+        return res.status(201).json({
+            course,
+            message: "Lecture created successfully"
+        });
+    } catch (error) {
+        console.error("Error creating lecture:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+export const getAllLectures = async (req, res) => {
+    try {
+        const courseId = req.params.courseID;
+        if (!courseId) {
+            return res.status(400).json({ message: "Course ID is required." });
+        }
+        const course = await Course.findById(courseId).populate('lectures');
+        if (!course) {
+            return res.status(404).json({ message: "Course not found." });
+        }
+        return res.status(200).json({
+            lectures: course.lectures,
+            message: "Lectures fetched successfully"
+        });
+    } catch (error) {
+        console.error("Error fetching lectures:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+export const editLecture = async (req, res) => {
+    try {
+        const {lectureTitle,videoInfo,ispreview} = req.body;
+        
+        
+    } catch (error) {
+        console.error("Error updating lecture:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+export const deleteLecture = async (req, res) => {
+    
 }

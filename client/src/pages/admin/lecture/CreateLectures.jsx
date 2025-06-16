@@ -1,16 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiEdit2, FiX, FiPlus } from 'react-icons/fi';
+import { FiEdit2, FiX, FiPlus, FiTrash2 } from 'react-icons/fi';
 import { useParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { useCreateLecturesMutation, useGetAllLecturesQuery } from '@/features/api/courseApi';
+import { useCreateLecturesMutation, useGetAllLecturesQuery, useRemoveLectureMutation } from '@/features/api/courseApi';
 
 function CreateLectures() {
   const { courseId } = useParams();
   const navigate = useNavigate();
   const [lectureTitle, setLectureTitle] = useState('');
   const [createLectures] = useCreateLecturesMutation();
-  const { data: lectureData, isLoading } = useGetAllLecturesQuery(courseId);
+  const { data: lectureData, isLoading,refetch } = useGetAllLecturesQuery(courseId);
+  const [removeLecture,{data,isLoading:removeLoading,isSuccess}]=useRemoveLectureMutation();
+  const handleDelete = async (lectureId) => {
+    try {
+      const response = await removeLecture({ lectureId, courseId }).unwrap();
+      refetch();
+      if (response.success) {
+        toast.success('Lecture deleted successfully');
+      }
+    } catch (error) {
+      toast.error(error.data?.message || 'Failed to delete lecture');
+    }
+  }
 
   if (isLoading) {
     return (
@@ -86,19 +98,28 @@ function CreateLectures() {
           {lectureData?.lectures?.length > 0 ? (
             <ul className="divide-y divide-gray-200">
               {lectureData.lectures.map((lecture, index) => (
-                <li 
+                <li
                   key={lecture._id}
                   className="flex items-center justify-between p-4 hover:bg-gray-50"
                 >
                   <span className="text-sm font-medium text-gray-900">
                     Lecture {index + 1}: {lecture.lectureTitle}
                   </span>
-                  <button
-                    onClick={() => navigate(`${lecture._id}`)}
-                    className="p-2 text-emerald-600 hover:text-emerald-700 rounded-lg hover:bg-emerald-50 transition-colors duration-200"
-                  >
-                    <FiEdit2 className="w-4 h-4" />
-                  </button>
+                  <div>
+                    <button
+                      onClick={() => navigate(`${lecture._id}`)}
+                      className="p-2 text-emerald-600 hover:text-emerald-700 rounded-lg hover:bg-emerald-50 transition-colors duration-200"
+                    >
+                      <FiEdit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={()=>handleDelete(lecture._id)}
+                      className="p-2 text-red-600 hover:text-red-700 rounded-lg hover:bg-red-50 transition-colors duration-200"
+                    >
+                      <FiTrash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+
                 </li>
               ))}
             </ul>

@@ -1,13 +1,17 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { FiVideo, FiTrash2, FiUpload, FiLock, FiSave } from 'react-icons/fi';
+import { FiVideo, FiTrash2, FiUpload, FiLock, FiSave, FiUnlock } from 'react-icons/fi';
 import axios from 'axios'
 import { toast } from 'sonner';
+import { useEditLectureMutation, useGetLectureByIdQuery } from '@/features/api/courseApi';
+import { useNavigate, useParams } from 'react-router-dom';
 
-const MEDIA_API='http://localhost:8000/api/v1/media';
+const MEDIA_API = 'http://localhost:8000/api/v1/media';
 const EditLecture = () => {
   const fileInputRef = useRef(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [secure_url, setSecureUrl] = useState('');
+  const [public_id, setPublicId] = useState('');
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [formData, setFormData] = useState({
@@ -16,6 +20,30 @@ const EditLecture = () => {
     videoUrl: '',
     videoFile: null
   });
+  const navigate = useNavigate();
+  const lectureId = useParams().lectureId;
+  // const courseID = useParams().courseID;
+  const courseId = useParams().courseId;
+  console.log(courseId, lectureId);
+  const [editLecture, { data, isLoading, isSuccess }] = useEditLectureMutation();
+  // console.log(data);
+  const { data: lecture, isLoading: lectureLoading, isSuccess: lectureSuccess } = useGetLectureByIdQuery({ lectureId, courseId });
+  // console.log(lecture.lecture.lectureTitle);
+
+  const lectureData = lecture?.lecture;
+  const lectureVideoUrl = lecture?.lecture?.videoUrl;
+  useEffect(() => {
+    if (lectureSuccess) {
+      console.log(lecture);
+      setFormData({
+        lectureTitle: lecture.lecture.lectureTitle || '',
+        isPreviewFree: lecture.lecture.isPreviewFree || false,
+        videoUrl: lecture.lecture.videoUrl || '',
+      })
+    }
+
+  }, [lectureData,lectureVideoUrl,lectureSuccess]);
+
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -60,6 +88,7 @@ const EditLecture = () => {
     formData.append('video', file);
 
     try {
+
       const response = await axios.post(`${MEDIA_API}/upload-video`, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (progressEvent) => {
@@ -77,15 +106,20 @@ const EditLecture = () => {
       }
 
       if (response.data.success) {
+        setSecureUrl(response.data.data.secure_url);
+        setPublicId(response.data.data.public_id);
         setFormData(prev => ({
           ...prev,
-          videoUrl: response.data.videoUrl,
+          videoUrl: previewUrl,
+          publicId: response.data.data.public_id,
+          secure_url: response.data.data.secure_url,
           videoFile: file,
-          
+
 
 
 
         }));
+        console.log(formData.videoUrl);
         toast.success('Video uploaded successfully!');
       }
     } catch (error) {
@@ -98,7 +132,36 @@ const EditLecture = () => {
         setUploadProgress(0);
       }, 1000);
     }
+
   };
+  console.log(secure_url);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.lectureTitle.trim()) {
+      toast.error('Lecture title is required');
+      return;
+    }
+
+
+    try {
+      const res = await editLecture({
+        lectureId,
+        secure_url,
+        public_id,
+        formData
+
+      }).unwrap();
+      console.log(secure_url);
+      if (res.success) {
+        toast.success('Lecture updated successfully!');
+        // Optionally, redirect or reset form
+      } else {
+        toast.error(res.message || 'Failed to update lecture');
+      }
+    } catch (error) {
+      toast.error(error.message || 'An error occurred while updating lecture');
+    }
+  }
 
   return (
     <motion.div
@@ -173,16 +236,15 @@ const EditLecture = () => {
                       {uploadProgress}%
                     </span>
                   </div>
-                  
+
                   <motion.div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                     <motion.div
-                      className={`h-full transition-all duration-300 ${
-                        uploadProgress === 100 
-                          ? 'bg-emerald-500' 
-                          : uploadProgress >= 90 
-                            ? 'bg-yellow-500' 
-                            : 'bg-blue-500'
-                      }`}
+                      className={`h-full transition-all duration-300 ${uploadProgress === 100
+                        ? 'bg-emerald-500'
+                        : uploadProgress >= 90
+                          ? 'bg-yellow-500'
+                          : 'bg-blue-500'
+                        }`}
                       style={{ width: `${uploadProgress}%` }}
                       initial={{ width: 0 }}
                       animate={{ width: `${uploadProgress}%` }}
@@ -224,8 +286,8 @@ const EditLecture = () => {
                   </div>
                 </div>
               ) : (
-                <div 
-                  className="text-center cursor-pointer" 
+                <div
+                  className="text-center cursor-pointer"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <FiVideo className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -273,7 +335,7 @@ const EditLecture = () => {
             >
               Cancel
             </button>
-            <button
+            <button onClick={handleSubmit}
               type="submit"
               disabled={isUploading}
               className="inline-flex items-center px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50"

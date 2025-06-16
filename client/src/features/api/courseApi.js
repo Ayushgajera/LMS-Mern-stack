@@ -7,7 +7,7 @@ const USER_API = 'http://localhost:8000/api/v1/course';
 
 export const courseApi = createApi({
     reducerPath: 'courseApi',
-    tagTypes: ['Refetch_Creator_Course'],
+    tagTypes: ['Refetch_Creator_Course','','Refetch_Creator_Lecture'],
     baseQuery: fetchBaseQuery({
         baseUrl: USER_API,
         credentials: 'include',
@@ -51,21 +51,45 @@ export const courseApi = createApi({
         }),
         createLectures: builder.mutation({
             query: ({ lectureTitle, courseId }) => ({
-                url: `${courseId}/lectures`,
+                url: `/${courseId}/lectures`,
                 method: 'POST',
                 body: { lectureTitle }
             }),
-            invalidatesTags: ['Refetch_Creator_Course']
+            invalidatesTags: ['Refetch_Creator_Lecture']
         }),
         getAllLectures: builder.query({
             query: (courseId) => ({
                 url: `${courseId}/lectures`,
                 method: 'get',
             }),
-            providesTags: ['Refetch_Creator_Course']
+            providesTags: ['Refetch_Creator_Lecture']
+        }),
+        editLecture: builder.mutation({
+            query: ({ lectureId, formData,courseId,public_id ,secure_url}) => ({
+                url: `/${courseId}/lectures/${lectureId}`,
+                method: 'PUT',
+                body: {formData,public_id,secure_url}
+            }),
+            invalidatesTags: ['Refetch_Creator_Lecture']
+
+        }),
+        getLectureById: builder.query({
+            query: ({ lectureId,courseId }) => ({
+                url: `/${courseId}/lectures/${lectureId}`,
+                method: 'GET'
+            }),
+             providesTags: ['Refetch_Creator_Lecture']
+            
+        }),
+        removeLecture: builder.mutation({
+            query: ({ lectureId,courseId }) => ({
+                url: `/${courseId}/lectures/${lectureId}`,
+                method: 'DELETE'
+            }),
+            invalidatesTags: ['refetch_creator_lecture']
         }),
 
     })
 })
 //build in hooks created by rtk query   
-export const { useCreateCourseMutation, useGetAllCoursesQuery, useEditCourseMutation, useGetCourseByIdQuery, useCreateLecturesMutation ,useGetAllLecturesQuery} = courseApi;
+export const { useCreateCourseMutation, useGetAllCoursesQuery, useEditCourseMutation, useGetCourseByIdQuery, useCreateLecturesMutation ,useGetAllLecturesQuery,useEditLectureMutation,useGetLectureByIdQuery,useRemoveLectureMutation} = courseApi;

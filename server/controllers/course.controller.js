@@ -1,5 +1,5 @@
 import { Course } from "../models/course.model.js";
-import { deleteMedia, uploadMedia } from "../utils/cloudinary.js";
+import { deleteMedia, deletevideo, uploadMedia } from "../utils/cloudinary.js";
 import Lecture from "../models/lecture.model.js";
 
 export const createCourse = async (req, res) => {
@@ -153,6 +153,7 @@ export const createLectures = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 }
+//lecture 
 export const getAllLectures = async (req, res) => {
     try {
         const courseId = req.params.courseID;
@@ -174,14 +175,91 @@ export const getAllLectures = async (req, res) => {
 }
 export const editLecture = async (req, res) => {
     try {
-        const {lectureTitle,videoInfo,ispreview} = req.body;
-        
-        
+        const { lectureTitle, secure_url, ispreview,public_id } = req.body;
+        console.log(secure_url)
+        const lectureId = req.params.lectureID;
+
+        if (!lectureId) {
+            return res.status(400).json({ message: "Lecture ID is required." });
+        }
+
+        const lecture = await Lecture.findById(lectureId);
+        if (!lecture) {
+            return res.status(404).json({ message: "Lecture not found." });
+        }
+
+        lecture.lectureTitle = lectureTitle || lecture.lectureTitle;
+        lecture.videoUrl = secure_url || lecture.secure_url;
+        lecture.publicID = public_id || lecture.publicID;
+        lecture.isPreview = ispreview !== undefined ? ispreview : lecture.isPreview;
+
+        await lecture.save();
+
+        const course = await Course.findOne({ lectures: lectureId });
+        if (course && !course.lectures.includes(lectureId)) {
+            course.lectures.push(lectureId);
+            await course.save();
+        }
+
+
+        return res.status(200).json({
+            lecture,
+            message: "Lecture updated successfully"
+        });
     } catch (error) {
         console.error("Error updating lecture:", error);
         res.status(500).json({ message: "Internal server error" });
     }
 }
-export const deleteLecture = async (req, res) => {
-    
+export const getLectureById = async (req, res) => {
+    try {
+        const lectureId = req.params.lectureID;
+        const courseId = req.params.courseID;
+
+        if (!lectureId) {
+            return res.status(400).json({ message: "Lecture ID is required." });
+        }
+        const lecture = await Lecture.findById(lectureId);
+        if (!lecture) {
+            return res.status(404).json({ message: "Lecture not found." });
+        }
+        return res.status(200).json({
+            lecture,
+            message: "Lecture fetched successfully"
+        });
+
+    } catch (error) {
+
+    }
+}
+export const removeLecture = async (req, res) => {
+    try {
+        const { lectureID } = req.params;
+        const lecture = await Lecture.findByIdAndDelete(lectureID);
+        console.log(lecture);
+        if (!lecture) {
+            return res.status(404).json({ message: "Lecture not found." });
+        }
+        //delete the lecture video from cloudinary
+        console.log(lecture.publicID);
+        if (lecture.publicID) {
+            console.log("deleting video");
+            await deletevideo(lecture.publicID);
+            
+            
+            
+        }
+        // remove lecture refrenece from the associated course
+        await Course.updateOne(
+            { lectures: lectureID }, // find the course that has the lecture
+            { $pull: { lectures: lectureID } }); //remove the lecture the lecture array
+
+        return res.status(200).json({
+                message: "Lecture removed successfully"
+             });
+             
+    } catch (error) {
+        console.error("Error removing lecture:", error);
+        res.status(500).json({ message: "failed to remove lecture" });
+    }
 }

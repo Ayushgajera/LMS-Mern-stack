@@ -9,177 +9,14 @@ import TextStyle from '@tiptap/extension-text-style';
 import { FontSize } from '@/extensions/FontSize'; // Assuming you have a custom FontSize extension
 import {
   FiSave, FiX, FiDollarSign, FiBook, FiGrid, FiImage, FiUpload, FiTarget, FiInfo,
-  FiBold, FiItalic, FiUnderline, FiAlignLeft, FiAlignCenter, FiAlignRight, FiList
+  FiBold, FiItalic, FiUnderline, FiAlignLeft, FiAlignCenter, FiAlignRight, FiList,
+  FiCheck,
+  FiUploadCloud
 } from 'react-icons/fi';
-import { useEditCourseMutation, useGetAllCoursesQuery, useGetCourseByIdQuery } from '@/features/api/courseApi';
+import { useEditCourseMutation, useGetAllCoursesQuery, useGetCourseByIdQuery, usePublishCourseMutation } from '@/features/api/courseApi';
+import RichTextEditor from '@/extensions/RichTextEditor';
 
-function RichTextEditor({ content, onChange }) {
-  const editor = useEditor({
-    extensions: [
-      StarterKit,
-      Underline,
-      TextStyle,
-      FontSize
-    ],
-    content: content,
-    editable: true,
-    autofocus: true,
-    editorProps: {
-      attributes: {
-        class: 'prose max-w-none p-4 min-h-[200px] focus:outline-none'
-      },
-      handleDOMEvents: {
-        focus: (view, event) => {
-          // Prevent focus loss
-          event.preventDefault();
-          return false;
-        }
-      }
-    },
-    onUpdate: ({ editor }) => {
-      const html = editor.getHTML();
-      onChange(html);
-    }
-  });
 
-  // Maintain focus state
-  const [isFocused, setIsFocused] = useState(false);
-
-  useEffect(() => {
-    if (editor && content !== editor.getHTML()) {
-      const cursorPos = editor.view.state.selection.$head.pos;
-      editor.commands.setContent(content);
-      // Restore cursor position
-      editor.commands.setTextSelection(cursorPos);
-    }
-  }, [content, editor]);
-
-  // Handle focus events
-  const handleFocus = () => {
-    setIsFocused(true);
-    editor?.commands.focus();
-  };
-
-  if (!editor) {
-    return null;
-  }
-
-  const fontSizes = [
-    { label: 'Default', value: '16px' },
-    { label: 'Small', value: '14px' },
-    { label: 'Large', value: '20px' },
-    { label: 'Extra Large', value: '24px' }
-  ];
-
-  const handleFontSize = (size) => {
-    editor.chain().focus().setFontSize(size).run()
-  };
-
-  // Update button click handlers to prevent default
-  const handleButtonClick = (callback) => (e) => {
-    e.preventDefault(); // Prevent form submission
-    callback();
-  };
-
-  return (
-    <div className={`border rounded-xl overflow-hidden ${isFocused ? 'ring-2 ring-emerald-500' : ''}`}
-      onClick={handleFocus}
-    >
-      {/* Toolbar */}
-      <div className="flex items-center gap-1 p-2 border-b bg-gray-50">
-        {/* Font Size Selector */}
-        <select
-          onChange={(e) => handleFontSize(e.target.value)}
-          className="h-8 px-2 rounded border border-gray-200 text-sm focus:outline-none 
-            focus:ring-2 focus:ring-emerald-500 focus:border-transparent mr-2"
-          value={editor.getAttributes('textStyle').fontSize || ''}
-        >
-          <option value="">Font Size</option>
-          {fontSizes.map((size) => (
-            <option key={size.value} value={size.value}>
-              {size.label}
-            </option>
-          ))}
-        </select>
-
-        <div className="w-px h-5 bg-gray-300 mx-1" />
-
-        <button
-          type="button" // Add button type
-          onClick={handleButtonClick(() => editor.chain().focus().toggleBold().run())}
-          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bold') ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
-            }`}
-          title="Bold"
-        >
-          <FiBold className="w-4 h-4" />
-        </button>
-        <button
-          type="button" // Add button type
-          onClick={handleButtonClick(() => editor.chain().focus().toggleItalic().run())}
-          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('italic') ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
-            }`}
-          title="Italic"
-        >
-          <FiItalic className="w-4 h-4" />
-        </button>
-        <button
-          type="button"
-          onClick={handleButtonClick(() => editor.chain().focus().toggleUnderline().run())}
-          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('underline') ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
-            }`}
-          title="Underline"
-        >
-          <FiUnderline className="w-4 h-4" />
-        </button>
-        <div className="w-px h-5 bg-gray-300 mx-1" />
-        <button
-          type="button"
-          onClick={handleButtonClick(() => editor.chain().focus().setTextAlign('left').run())}
-          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive({ textAlign: 'left' }) ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
-            }`}
-          title="Align Left"
-        >
-          <FiAlignLeft className="w-4 h-4" />
-        </button>
-        <button
-          type="button"
-          onClick={handleButtonClick(() => editor.chain().focus().setTextAlign('center').run())}
-          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive({ textAlign: 'center' }) ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
-            }`}
-          title="Align Center"
-        >
-          <FiAlignCenter className="w-4 h-4" />
-        </button>
-        <button
-          type="button"
-          onClick={handleButtonClick(() => editor.chain().focus().setTextAlign('right').run())}
-          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive({ textAlign: 'right' }) ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
-            }`}
-          title="Align Right"
-        >
-          <FiAlignRight className="w-4 h-4" />
-        </button>
-        <div className="w-px h-5 bg-gray-300 mx-1" />
-        <button
-          onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bulletList') ? 'bg-gray-200 text-emerald-600' : 'text-gray-600'
-            }`}
-          title="Bullet List"
-        >
-          <FiList className="w-4 h-4" />
-        </button>
-      </div>
-
-      {/* Editor Content */}
-      <EditorContent
-        editor={editor}
-        className="prose max-w-none focus:outline-none cursor-text"
-        onFocus={handleFocus}
-        onBlur={() => setIsFocused(false)}
-      />
-    </div>
-  );
-}
 
 function EditCourse() {
   const params = useParams();
@@ -198,11 +35,23 @@ function EditCourse() {
   });
   const [previewUrl, setPreviewUrl] = useState('');
   //get course by id Api call
-  const { data: courseData, isLoading: isCourseLoading,error } = useGetCourseByIdQuery(courseId);
+  const { data: courseData, isLoading: isCourseLoading, error ,refetch } = useGetCourseByIdQuery(courseId);
+  console.log("Course Data:", courseData?.course.ispublished);
   //edit course Api call
   const [editCourse, { data, isLoading, isSuccess }] = useEditCourseMutation(courseId);
+  const[publishCourse,{isLoading:isPublishLoading }]=usePublishCourseMutation();
   console.log("Course Data:", courseData);
   const course = courseData?.course;
+  const publishStatusHandler = async(action) => {
+    try{
+      await publishCourse({ courseId, query:action }).unwrap();
+      toast.success("Course updated successfully!");
+      refetch();
+    }catch(error) {
+      toast.error("Failed to update course. Please try again.");
+      console.error("Edit Course Error:", error);
+    }
+  }
   useEffect(() => {
     if (course) {
       console.log("Setting course description:", course.courseDescription);
@@ -323,6 +172,16 @@ function EditCourse() {
               </p>
             </div>
             <div className="flex items-center gap-3">
+
+              <button onClick={() => publishStatusHandler(courseData?.course.ispublished ? "false" : "true")}
+                className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2.5 
+                  bg-gray-800 text-white rounded-xl hover:bg-gray-950
+                  transition-colors duration-200 font-medium"
+              >
+                <FiUploadCloud className="w-4 h-4 mr-2" />
+
+                {isPublishLoading ? "Updating..." : courseData?.course.ispublished ? "Unpublish" : "Publish"}
+              </button>
               <Link
                 to={`/admin/courses/edit/${courseId}/lectures`}
                 className="flex-1 sm:flex-none inline-flex items-center justify-center px-4 py-2.5 

@@ -1,77 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiSearch, FiFilter, FiGrid, FiList } from 'react-icons/fi';
 import Course from './Course';
+import { useGetPublishCourseQuery } from '@/features/api/courseApi';
+import { socket } from '../../extensions/socket'; // ✅ Import socket connection
 
 const Courses = () => {
-  const courses = [
-    {
-      id: 1,
-      title: 'Advanced Web Development',
-      description: 'Master modern web technologies and frameworks with hands-on projects.',
-      instructor: {
-        name: 'John Doe',
-        avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-        role: 'Senior Developer'
-      },
-      level: 'Intermediate',
-      duration: '12 weeks',
-      lessons: 24,
-      rating: 4.8,
-      students: 1234,
-      price: 49.99,
-      image: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=2831&auto=format&fit=crop',
-    },
-    {
-      id: 2,
-      title: 'Advanced Web Development',
-      description: 'Master modern web technologies and frameworks with hands-on projects.',
-      instructor: {
-        name: 'John Doe',
-        avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
-        role: 'Senior Developer'
-      },
-      level: 'Intermediate',
-      duration: '12 weeks',
-      lessons: 24,
-      rating: 4.8,
-      students: 1234,
-      price: 49.99,
-      image: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159?q=80&w=2831&auto=format&fit=crop',
-    
-    },
-    {
-      id: 3,
-      title: 'Machine Learning Basics',
-      description: 'Learn the fundamentals of machine learning and build your first models.',
-      instructor: {
-        name: 'Jane Smith',
-        avatar: 'https://randomuser.me/api/portraits/women/2.jpg',
-        role: 'Data Scientist'
-      },
-      level: 'Beginner',
-      duration: '8 weeks',
-      lessons: 16,
-      rating: 4.9,
-      students: 856,
-      price: 39.99,
-      image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=2940&auto=format&fit=crop',
-      
-    },
-    // Add more courses as needed
-  ];
-  const [isLoading, setIsLoading] = useState(true);
+  const { data, isSuccess, isLoading, refetch } = useGetPublishCourseQuery();
+  const courses = data?.courses || [];
+
+  const [updatedCourses, setUpdatedCourses] = useState([]);
   const [viewMode, setViewMode] = useState('grid');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedLevel, setSelectedLevel] = useState('all');
 
-  // Simulate loading
-  React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
+  // ✅ Real-time course update listener
+  useEffect(() => {
+    socket.on("courseUpdated", (updatedCourse) => {
+      console.log("📡 Real-time course updated:", updatedCourse);
+      const index = courses.findIndex(c => c._id === updatedCourse._id);
+      if (index !== -1) {
+        const newCourses = [...courses];
+        newCourses[index] = updatedCourse;
+        setUpdatedCourses(newCourses);
+      } else {
+        // If new course was added
+        setUpdatedCourses([updatedCourse, ...courses]);
+      }
+    });
+
+    return () => {
+      socket.off("courseUpdated");
+    };
+  }, [courses]);
 
   const SkeletonCard = () => (
     <div className="bg-white rounded-xl shadow-sm p-4 space-y-4">
@@ -94,8 +55,6 @@ const Courses = () => {
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <h1 className="text-2xl font-bold text-gray-800">All Courses</h1>
-            
-            {/* Search Bar */}
             <div className="relative flex-1 max-w-xl">
               <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -104,8 +63,6 @@ const Courses = () => {
                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
               />
             </div>
-
-            {/* View Toggle */}
             <div className="flex items-center gap-2">
               <button
                 onClick={() => setViewMode('grid')}
@@ -160,8 +117,8 @@ const Courses = () => {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {isLoading ? (
           <div className={`grid gap-6 ${
-            viewMode === 'grid' 
-              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+            viewMode === 'grid'
+              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
               : 'grid-cols-1'
           }`}>
             {[...Array(8)].map((_, index) => (
@@ -170,12 +127,12 @@ const Courses = () => {
           </div>
         ) : (
           <div className={`grid gap-6 ${
-            viewMode === 'grid' 
-              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
+            viewMode === 'grid'
+              ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
               : 'grid-cols-1'
           }`}>
-            {courses.map(course => (
-              <Course key={course.id} course={course} />
+            {(updatedCourses.length > 0 ? updatedCourses : courses).map(course => (
+              <Course key={course._id} course={course} />
             ))}
           </div>
         )}

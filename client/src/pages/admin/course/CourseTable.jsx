@@ -1,14 +1,33 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiEdit2, FiTrash2, FiPlus, FiBook, FiAlertCircle } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import { useGetAllCoursesQuery } from '@/features/api/courseApi';
+import { useGetAllCoursesQuery, useRemoveCourseMutation } from '@/features/api/courseApi';
 import { toast } from 'sonner';
 
 function CourseTable() {
   const { data, isLoading, error, refetch } = useGetAllCoursesQuery();
-  console.log(data);
+  const [showDeletePopup, setShowDeletePopup] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState(null);
+  const [removeCourse,{data:removeCourseData,isLoading:removeCourseLoading}]=useRemoveCourseMutation();
+
+  useEffect(() => {
+    refetch();
+  }, []);
+
+const handleRemoveCourse=async()=>{
+  console.log("work")
+  try {
+    await removeCourse(selectedCourseId).unwrap();
+    toast.success('Course deleted successfully!');
+
+    refetch();
+    setShowDeletePopup(false);
+  } catch (error) {
+    toast.error('Failed to delete course. Please try again.');
+  } 
   
+}
 
   // Loading state with better UI
   if (isLoading) {
@@ -47,8 +66,6 @@ function CourseTable() {
       </div>
     );
   }
-
-  
 
   // Helper functions
   const formatPrice = (price) => {
@@ -188,8 +205,8 @@ function CourseTable() {
                   {/* Status cell */}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                      ${course.isPublished ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
-                      {course.isPublished ? 'Published' : 'Draft'}
+                      ${course.ispublished ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
+                      {course.ispublished ? 'Published' : 'Draft'}
                     </span>
                   </td>
 
@@ -209,8 +226,11 @@ function CourseTable() {
                         <FiEdit2 className="h-4 w-4 mr-1" />
                         <span>Edit</span>
                       </Link>
-                      <button 
-                        
+                      <button
+                        onClick={() => {
+                          setSelectedCourseId(course._id);
+                          setShowDeletePopup(true);
+                        }}
                         className="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-600 
                           rounded-lg hover:bg-red-100 transition-colors duration-200"
                       >
@@ -224,6 +244,29 @@ function CourseTable() {
           </table>
         </div>
       </motion.div>
+
+      {showDeletePopup && (
+        <div className="fixed inset-0 bg-black  bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-sm">
+            <h2 className="text-lg font-semibold mb-4">Confirm Delete</h2>
+            <p className="mb-6">Are you sure you want to delete this course?</p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setShowDeletePopup(false)}
+                className="px-4 py-2 rounded bg-gray-200 hover:bg-gray-300"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleRemoveCourse}
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

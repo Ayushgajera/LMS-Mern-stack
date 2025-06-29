@@ -2,7 +2,7 @@ import Login from "./pages/Login"
 import HeroSection from "./pages/student/herosection"
 import ProfilePage from "./pages/student/profilepage"
 import MainLayout from "./layout/MainLayout"
-import { createBrowserRouter} from "react-router-dom"
+import { createBrowserRouter } from "react-router-dom"
 import { RouterProvider } from "react-router"
 import MyLearning from "./pages/student/MyLearning"
 import AdminLayout from "./pages/admin/AdminLayout"
@@ -12,6 +12,8 @@ import AddCourse from "./pages/admin/course/addCourse"
 import EditCourse from "./pages/admin/course/EditCourse"
 import CreateLectures from "./pages/admin/lecture/CreateLectures"
 import EditLecture from "./pages/admin/lecture/EditLecture"
+import CourseContent from "./pages/course/CourseContent"
+import EnrolledCourseLectures from "./pages/student/EnrolledCourseLectures"
 
 const appRouter = createBrowserRouter([
   {
@@ -30,6 +32,11 @@ const appRouter = createBrowserRouter([
         path: "my-courses",
         element: <MyLearning />
       },
+      {
+        path: "course/:courseId",
+        element: <CourseContent />
+      },
+
 
       // Admin Routes
       {
@@ -71,7 +78,16 @@ const appRouter = createBrowserRouter([
   {
     path: "login",
     element: <Login />
-  }
+  },
+  {
+    path: "register",
+    element: <Login />
+  },
+  {
+    path: "/enrolled/lectures",
+    element: <EnrolledCourseLectures />
+  },
+
 ]);
 function App() {
 

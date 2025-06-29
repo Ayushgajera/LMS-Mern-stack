@@ -4,7 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiBookOpen, FiGrid, FiUser, FiBell, FiLogOut, FiEdit2, FiSettings } from 'react-icons/fi';
 import { FiBook, FiAward, FiBarChart2, FiHeart, FiDownload, FiCalendar, FiMessageSquare } from 'react-icons/fi';
 import { useLogoutUserMutation } from '@/features/api/authApi';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { userLoggedOut } from "@/features/authslice"; // adjust path if needed
 
 const menuItems = [
   {
@@ -63,7 +64,8 @@ function Navbar() {
   const location = useLocation();
   const [logoutUser, { data, isLoading }] = useLogoutUserMutation();
   const userData = useSelector((state) => state.auth.user);
-  const {isAuthenticated } = useSelector((state) => state.auth);
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
 
   console.log(userData);
   console.log(isAuthenticated)
@@ -256,14 +258,18 @@ function Navbar() {
     }
 
     return (
-      <div className="hidden md:flex items-center space-x-4">
-        
+      <div className="hidden md:flex items-center space-x-3">
         <Link
           to="/login"
-          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 
-            transition-colors duration-200"
+          className="px-4 py-2 border border-green-600 text-green-600 bg-white rounded-lg font-semibold hover:bg-green-50 hover:text-green-700 transition-colors duration-200"
         >
-         Login
+          Login
+        </Link>
+        <Link
+          to="/register"
+          className="px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors duration-200 shadow"
+        >
+          Sign Up
         </Link>
       </div>
     );
@@ -322,6 +328,18 @@ function Navbar() {
       </div>
     );
   };
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      // Replace 'token' with your actual cookie name
+      const hasToken = document.cookie.split(';').some(c => c.trim().startsWith('token='));
+      if (!hasToken && isAuthenticated) {
+        dispatch(userLoggedOut());
+      }
+    }, 2000); // check every 2 seconds
+
+    return () => clearInterval(interval);
+  }, [isAuthenticated, dispatch]);
 
   return (
     <nav className={`fixed w-full top-0 z-50 transition-all duration-300 

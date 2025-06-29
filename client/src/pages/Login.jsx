@@ -3,11 +3,14 @@ import { Button } from '../components/ui/button'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLoginUserMutation, useRegisterUserMutation } from '@/features/api/authApi'
 import { toast } from 'sonner'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { FiBook } from 'react-icons/fi';
 
 const Login = () => {
-  const [isLogin, setIsLogin] = useState(true)
+  const location = useLocation();
+  const navigate = useNavigate();
+  const isLogin = location.pathname === "/login";
+  
   const [signupInput, setSignupInput] = useState({
     name: "",
     email: "",
@@ -53,7 +56,6 @@ const Login = () => {
       }))
     }
   }
-  const navigate=useNavigate()
  const handleSubmit = async (e) => {
   e.preventDefault();
     try {
@@ -123,10 +125,12 @@ useEffect(() => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center">
-              <FiBook className="w-8 h-8 text-emerald-600" />
-              <span className="ml-2 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-500">
-                EduLearn
-              </span>
+              <Link to="/" className="flex items-center group">
+                <FiBook className="w-8 h-8 text-emerald-600 group-hover:scale-110 transition-transform" />
+                <span className="ml-2 text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-500 group-hover:text-emerald-700 transition-colors">
+                  EduLearn
+                </span>
+              </Link>
             </div>
             <div className="text-sm">
               <span className="text-gray-500">Need help? </span>

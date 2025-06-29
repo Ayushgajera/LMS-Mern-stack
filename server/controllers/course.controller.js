@@ -1,4 +1,5 @@
 import { Course } from "../models/course.model.js";
+import { User } from "../models/user.model.js"
 import { deleteMedia, deletevideo, uploadMedia } from "../utils/cloudinary.js";
 import Lecture from "../models/lecture.model.js";
 
@@ -97,7 +98,11 @@ export const editCourse = async (req, res) => {
 
 
         course = await Course.findByIdAndUpdate(courseId, updateData, { new: true });
+        // Access io from app
+        const io = req.app.get("io");
 
+        // Emit real-time update to all users
+        io.emit("courseUpdated", course);
         return res.status(200).json({
             course,
             message: "Course updated successfully"
@@ -111,7 +116,8 @@ export const editCourse = async (req, res) => {
 export const getCourseById = async (req, res) => {
     try {
         const courseId = req.params.courseID;
-        const course = await Course.findById(courseId);
+        const course = await Course.findById(courseId).populate("creator", "name email photoUrl").populate("lectures");
+
         if (!course) {
             return res.status(404).json({ message: "Course not found." });
         }
@@ -124,6 +130,32 @@ export const getCourseById = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 }
+export const removeCourse = async (req, res) => {
+    try {
+        const courseId = req.params.courseID;
+        const course = await Course.findByIdAndDelete(courseId);
+        if (!course) {
+            return res.status(404).json({ message: "Course not found." });
+        }
+        //delete the course thumbnail from cloudinary
+        if (course.courseThumbnail) {
+            const publicId = course.courseThumbnail.split("/").pop().split(".")[0];
+            await deleteMedia(publicId);
+        }
+        //remove all lectures associated with the course
+        await Lecture.deleteMany({ _id: { $in: course.lectures } }); // always $in operator pachi array hovo joy
+
+        return res.status(200).json({
+            message: "Course removed successfully"
+        });
+    } catch (error) {
+        console.error("Error removing course:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+
+
+//lectures controller
 export const createLectures = async (req, res) => {
     try {
         const courseId = req.params.courseID;
@@ -153,7 +185,6 @@ export const createLectures = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
     }
 }
-//lecture 
 export const getAllLectures = async (req, res) => {
     try {
         const courseId = req.params.courseID;
@@ -175,7 +206,7 @@ export const getAllLectures = async (req, res) => {
 }
 export const editLecture = async (req, res) => {
     try {
-        const { lectureTitle, secure_url, ispreview,public_id } = req.body;
+        const { lectureTitle, secure_url, ispreview, public_id } = req.body;
         console.log(secure_url)
         const lectureId = req.params.lectureID;
 
@@ -245,9 +276,9 @@ export const removeLecture = async (req, res) => {
         if (lecture.publicID) {
             console.log("deleting video");
             await deletevideo(lecture.publicID);
-            
-            
-            
+
+
+
         }
         // remove lecture refrenece from the associated course
         await Course.updateOne(
@@ -255,11 +286,54 @@ export const removeLecture = async (req, res) => {
             { $pull: { lectures: lectureID } }); //remove the lecture the lecture array
 
         return res.status(200).json({
-                message: "Lecture removed successfully"
-             });
-             
+            message: "Lecture removed successfully"
+        });
+
     } catch (error) {
         console.error("Error removing lecture:", error);
         res.status(500).json({ message: "failed to remove lecture" });
     }
 }
+
+export const publishCourse = async (req, res) => {
+    try {
+        const { courseID } = req.params;
+        const { publish } = req.query; // true or flash 
+        console.log(courseID);
+        console.log(publish);
+        const course = await Course.findById(courseID);
+        if (!course) {
+            return res.status(404).json({ message: "Course not found." });
+        }
+        course.ispublished = publish === "true";
+        await course.save();
+        const statusMessage = course.ispublished ? "published" : "unpublished";
+        return res.status(200).json({
+            course,
+            message: `Course is ${statusMessage} successfully`
+        });
+
+
+    } catch (error) {
+        console.error("Error updating course:", error);
+        res.status(500).json({ message: "Internal server error" });
+    }
+}
+export const getPublishCourse = async (req, res) => {
+    try {
+        const courses = await Course.find({ ispublished: true }).populate("creator", "name email photoUrl");
+        console.log(courses);
+
+        if (courses.length === 0) {
+            return res.status(404).json({ message: "No published courses found." });
+        }
+
+        return res.status(200).json({
+            courses,
+            message: "Published courses fetched successfully"
+        });
+    } catch (error) {
+        console.error("Error fetching published courses:", error);
+        res.status(500).json({ message: "Failed to fetch published courses." });
+    }
+};

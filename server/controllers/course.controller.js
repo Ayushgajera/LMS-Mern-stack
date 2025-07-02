@@ -98,6 +98,7 @@ export const editCourse = async (req, res) => {
 
 
         course = await Course.findByIdAndUpdate(courseId, updateData, { new: true });
+        console.log("Updated course:", course);
         // Access io from app
         const io = req.app.get("io");
 
@@ -298,9 +299,7 @@ export const removeLecture = async (req, res) => {
 export const publishCourse = async (req, res) => {
     try {
         const { courseID } = req.params;
-        const { publish } = req.query; // true or flash 
-        console.log(courseID);
-        console.log(publish);
+        const { publish } = req.query; // true or false
         const course = await Course.findById(courseID);
         if (!course) {
             return res.status(404).json({ message: "Course not found." });
@@ -308,12 +307,15 @@ export const publishCourse = async (req, res) => {
         course.ispublished = publish === "true";
         await course.save();
         const statusMessage = course.ispublished ? "published" : "unpublished";
+
+        // ✅ Emit real-time update to all users
+        const io = req.app.get("io");
+        io.emit("courseUpdated", course);
+
         return res.status(200).json({
             course,
             message: `Course is ${statusMessage} successfully`
         });
-
-
     } catch (error) {
         console.error("Error updating course:", error);
         res.status(500).json({ message: "Internal server error" });

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { FiSearch, FiFilter, FiGrid, FiList } from 'react-icons/fi';
 import Course from './Course';
@@ -9,30 +9,20 @@ const Courses = () => {
   const { data, isSuccess, isLoading, refetch } = useGetPublishCourseQuery();
   const courses = data?.courses || [];
 
-  const [updatedCourses, setUpdatedCourses] = useState([]);
   const [viewMode, setViewMode] = useState('grid');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedLevel, setSelectedLevel] = useState('all');
 
   // ✅ Real-time course update listener
   useEffect(() => {
-    socket.on("courseUpdated", (updatedCourse) => {
-      console.log("📡 Real-time course updated:", updatedCourse);
-      const index = courses.findIndex(c => c._id === updatedCourse._id);
-      if (index !== -1) {
-        const newCourses = [...courses];
-        newCourses[index] = updatedCourse;
-        setUpdatedCourses(newCourses);
-      } else {
-        // If new course was added
-        setUpdatedCourses([updatedCourse, ...courses]);
-      }
-    });
-
-    return () => {
-      socket.off("courseUpdated");
+    const handleCourseUpdated = () => {
+      refetch();
     };
-  }, [courses]);
+    socket.on("courseUpdated", handleCourseUpdated);
+    return () => {
+      socket.off("courseUpdated", handleCourseUpdated);
+    };
+  }, [refetch]);
 
   const SkeletonCard = () => (
     <div className="bg-white rounded-xl shadow-sm p-4 space-y-4">
@@ -131,7 +121,7 @@ const Courses = () => {
               ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
               : 'grid-cols-1'
           }`}>
-            {(updatedCourses.length > 0 ? updatedCourses : courses).map(course => (
+            {courses.map(course => (
               <Course key={course._id} course={course} />
             ))}
           </div>

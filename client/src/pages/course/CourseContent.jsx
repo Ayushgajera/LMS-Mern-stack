@@ -17,7 +17,6 @@ import {
 import { useParams, useNavigate } from 'react-router-dom';
 import DOMPurify from 'dompurify';
 import { socket } from '../../extensions/socket'; // ✅ import socket connection
-
 function CourseContent() {
   const [openSection, setOpenSection] = useState(null);
   const [courseData, setCourseData] = useState(null);
@@ -121,13 +120,20 @@ function CourseContent() {
 
             {/* Description */}
             <div
-              className="prose prose-sm max-w-none text-gray-800 [&>ul]:list-disc [&>ul]:pl-6 [&>ul>li>p]:m-0"
+              className="course-description max-w-none text-gray-800"
               dangerouslySetInnerHTML={{
                 __html: DOMPurify.sanitize(
                   courseData.courseDescription?.replace(
                     /<li><p>(.*?)<\/p><\/li>/g,
                     '<li>$1</li>'
-                  )
+                  ),
+                  {
+                    ALLOWED_TAGS: [
+                      'b', 'strong', 'i', 'em', 'u', 'ul', 'ol', 'li', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'br', 'span',
+                      'a', 'img', 'blockquote', 'pre', 'code', 'hr'
+                    ],
+                    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'style'],
+                  }
                 ),
               }}
             />

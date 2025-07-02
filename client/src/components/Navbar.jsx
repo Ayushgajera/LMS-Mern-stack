@@ -329,17 +329,6 @@ function Navbar() {
     );
   };
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Replace 'token' with your actual cookie name
-      const hasToken = document.cookie.split(';').some(c => c.trim().startsWith('token='));
-      if (!hasToken && isAuthenticated) {
-        dispatch(userLoggedOut());
-      }
-    }, 2000); // check every 2 seconds
-
-    return () => clearInterval(interval);
-  }, [isAuthenticated, dispatch]);
 
   return (
     <nav className={`fixed w-full top-0 z-50 transition-all duration-300 

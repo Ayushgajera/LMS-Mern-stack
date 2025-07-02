@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import connectDB from "./db/db.js";
 import userRouter from "./routes/user.routes.js";
 import courseRouter from "./routes/course.routes.js";
+import aiRoutes from "./routes/aiRoutes.routes.js";
 import mediaroute from "./routes/media.routes.js";
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
@@ -47,8 +48,9 @@ io.on("connection", (socket) => {
 connectDB();
 
 // Routes
-app.use("/api/v1/media", mediaroute);
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/media", mediaroute);
+app.use("/api/v1/ai", aiRoutes);
 app.use("/api/v1/course", courseRouter);
 
 // Start server

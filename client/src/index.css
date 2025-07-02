@@ -249,3 +249,43 @@
   @apply fill-emerald-600;
 }
 
+/* Add this to App.css or index.css */
+.course-description h1,
+.course-description h2,
+.course-description h3,
+.course-description h4,
+.course-description h5,
+.course-description h6 {
+  font-weight: bold;
+  margin-top: 1.2em;
+  margin-bottom: 0.5em;
+  color: #000000; /* emerald-700 */
+}
+
+.course-description b,
+.course-description strong {
+  font-weight: bold;
+}
+
+.course-description i,
+.course-description em {
+  font-style: italic;
+}
+
+.course-description u {
+  text-decoration: underline;
+}
+
+.course-description ul,
+.course-description ol {
+  margin-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.course-description li {
+  margin-bottom: 0.3em;
+}
+
+.course-description p {
+  margin-bottom: 1em;
+}

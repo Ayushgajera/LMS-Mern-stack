@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { toast } from 'sonner';
+import { toast, Toaster } from 'sonner';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
@@ -11,10 +11,11 @@ import {
   FiSave, FiX, FiDollarSign, FiBook, FiGrid, FiImage, FiUpload, FiTarget, FiInfo,
   FiBold, FiItalic, FiUnderline, FiAlignLeft, FiAlignCenter, FiAlignRight, FiList,
   FiCheck,
-  FiUploadCloud
+  FiUploadCloud, FiZap
 } from 'react-icons/fi';
 import { useEditCourseMutation, useGetAllCoursesQuery, useGetCourseByIdQuery, usePublishCourseMutation } from '@/features/api/courseApi';
 import RichTextEditor from '@/extensions/RichTextEditor';
+import axios from 'axios';
 
 
 
@@ -35,19 +36,19 @@ function EditCourse() {
   });
   const [previewUrl, setPreviewUrl] = useState('');
   //get course by id Api call
-  const { data: courseData, isLoading: isCourseLoading, error ,refetch } = useGetCourseByIdQuery(courseId);
+  const { data: courseData, isLoading: isCourseLoading, error, refetch } = useGetCourseByIdQuery(courseId);
   console.log("Course Data:", courseData?.course.ispublished);
   //edit course Api call
   const [editCourse, { data, isLoading, isSuccess }] = useEditCourseMutation(courseId);
-  const[publishCourse,{isLoading:isPublishLoading }]=usePublishCourseMutation();
+  const [publishCourse, { isLoading: isPublishLoading }] = usePublishCourseMutation();
   console.log("Course Data:", courseData);
-  const course = courseData?.course;
-  const publishStatusHandler = async(action) => {
-    try{
-      await publishCourse({ courseId, query:action }).unwrap();
+   const course = courseData?.course;
+  const publishStatusHandler = async (action) => {
+    try {
+      await publishCourse({ courseId, query: action }).unwrap();
       toast.success("Course updated successfully!");
       refetch();
-    }catch(error) {
+    } catch (error) {
       toast.error("Failed to update course. Please try again.");
       console.error("Edit Course Error:", error);
     }
@@ -126,6 +127,62 @@ function EditCourse() {
       console.error("Edit Course Error:", error);
     }
   }
+ 
+  const [isDescriptionLoading, setIsDescriptionLoading] = useState(false);
+
+  const handleGenerateDescription = async () => {
+    if (!formData.courseTitle) {
+      toast.error("Please enter a course title before generating a description.");
+      return;
+    }
+    setIsDescriptionLoading(true);
+    try {
+      const response = await axios.post("http://localhost:8000/api/v1/ai/description", {
+        courseTitle: formData.courseTitle,
+      });
+
+      const description = response.data?.description;
+
+      if (description) {
+        setFormData(prev => ({ ...prev, courseDescription: description }));
+        toast.success("📝 Description generated successfully!");
+      } else {
+        toast.error("Description generation failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Generate Description Error:", error);
+      toast.error("❌ Failed to generate description. Check API or try again.");
+    }
+    setIsDescriptionLoading(false);
+  };
+  const [isSubtitleLoading, setIsSubtitleLoading] = useState(false);
+
+  const handleGenerateSubtitle = async () => {
+    if (!formData.courseTitle) {
+      toast.error("Please enter a course title before generating a subtitle.");
+      return;
+    }
+    setIsSubtitleLoading(true);
+    try {
+      const response = await axios.post("http://localhost:8000/api/v1/ai/subtitle", {
+        courseTitle: formData.courseTitle,
+      });
+
+      const subtitle = response.data?.subtitle;
+
+      if (subtitle) {
+        setFormData(prev => ({ ...prev, subTitle: subtitle }));
+        toast.success("✨ Subtitle generated successfully!");
+      } else {
+        toast.error("Subtitle generation failed. Please try again.");
+      }
+    } catch (error) {
+      console.error("Generate Subtitle Error:", error);
+      toast.error("❌ Failed to generate subtitle. Check API or try again.");
+    }
+    setIsSubtitleLoading(false);
+  };
+
   // Handle success state
   if (isSuccess) {
     toast.success("Course updated successfully!");
@@ -238,8 +295,30 @@ function EditCourse() {
 
             {/* Subtitle */}
             <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 flex items-center">
                 Subtitle
+                <button
+                  type="button"
+                  onClick={handleGenerateSubtitle}
+                  className={`ml-3 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-400 to-green-500 text-white font-semibold rounded-xl shadow hover:from-emerald-500 hover:to-green-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:opacity-60`}
+                  title="Let AI generate for you"
+                  disabled={isSubtitleLoading}
+                >
+                  {isSubtitleLoading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 mr-1" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                      </svg>
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <FiZap className="w-5 h-5" />
+                      <span>AI Generate</span>
+                    </>
+                  )}
+                </button>
               </label>
               <input
                 type="text"
@@ -296,11 +375,33 @@ function EditCourse() {
 
             {/* Description */}
             <div className="space-y-1">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 flex items-center">
                 Course Description
+                <button
+                  type="button"
+                  onClick={handleGenerateDescription}
+                  className={`ml-3 inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-emerald-400 to-green-500 text-white font-semibold rounded-xl shadow hover:from-emerald-500 hover:to-green-600 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-400 disabled:opacity-60`}
+                  title="Let AI generate for you"
+                  disabled={isDescriptionLoading}
+                >
+                  {isDescriptionLoading ? (
+                    <>
+                      <svg className="animate-spin h-5 w-5 mr-1" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+                      </svg>
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <FiZap className="w-5 h-5" />
+                      <span>AI Generate</span>
+                    </>
+                  )}
+                </button>
               </label>
               <RichTextEditor
-                content={formData.courseDescription || ''} // Remove the default text
+                content={formData.courseDescription || ''}
                 onChange={(content) => {
                   setFormData(prev => ({
                     ...prev,

@@ -13,7 +13,7 @@ const isAuthenticated = (req, res, next) => {
         if(!decoded){
             return res.status(401).json({
                 success: false,
-                message: "Invalid token"
+                message: "unauthorized  access denied"
             });
         }
         req.id= decoded.userId;

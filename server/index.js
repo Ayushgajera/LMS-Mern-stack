@@ -4,7 +4,9 @@ import connectDB from "./db/db.js";
 import userRouter from "./routes/user.routes.js";
 import courseRouter from "./routes/course.routes.js";
 import aiRoutes from "./routes/aiRoutes.routes.js";
+import paymentRoutes from "./routes/paymentRoutes.routes.js";   
 import mediaroute from "./routes/media.routes.js";
+import CourseProgressRoute from "./routes/courseProgress.routes.js";
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import morgan from 'morgan';
@@ -52,6 +54,8 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/media", mediaroute);
 app.use("/api/v1/ai", aiRoutes);
 app.use("/api/v1/course", courseRouter);
+app.use("/api/v1/payment", paymentRoutes);
+app.use("/api/v1/progress", CourseProgressRoute);
 
 // Start server
 const PORT = process.env.PORT || 8000;

@@ -4,6 +4,7 @@ import storage from 'redux-persist/lib/storage';
 import rootreducer from "./rootReducer";
 import { authApi } from "@/features/api/authApi";
 import { courseApi } from "@/features/api/courseApi";
+import { courseProgressApi } from "@/features/api/courseProgressApi";
 
 
 const persistConfig = {
@@ -23,7 +24,8 @@ export const appStore = configureStore({
         }
       }).concat([
         authApi.middleware,
-        courseApi.middleware
+        courseApi.middleware,
+        courseProgressApi.middleware
       ]),
 });
 

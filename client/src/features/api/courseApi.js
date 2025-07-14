@@ -72,14 +72,19 @@ export const courseApi = createApi({
             providesTags: ['Refetch_Creator_Lecture']
         }),
         editLecture: builder.mutation({
-            query: ({ lectureId, formData, courseId, public_id, secure_url }) => ({
-                url: `/${courseId}/lectures/${lectureId}`,
-                method: 'PUT',
-                body: { formData, public_id, secure_url }
+            query: ({ lectureId, courseId, lectureTitle, isPreviewFree, secure_url, public_id }) => ({
+              url: `/${courseId}/lectures/${lectureId}`,
+              method: 'PUT',
+              body: {
+                lectureTitle,
+                isPreviewFree,
+                secure_url,
+                public_id
+              }
             }),
             invalidatesTags: ['Refetch_Creator_Lecture']
-
-        }),
+          }),
+          
         getLectureById: builder.query({
             query: ({ lectureId, courseId }) => ({
                 url: `/${courseId}/lectures/${lectureId}`,
@@ -109,10 +114,16 @@ export const courseApi = createApi({
             }),
             providesTags: ['Refetch_Creator_Course']
         }),
-       
+       getPurchaseCourse: builder.query({
+           query: (courseId) => ({
+               url: `/${courseId}/purchase`,
+               method: 'GET'
+           }),
+           providesTags: ['Refetch_Creator_Course']
+       })
 
 
     })
 })
 //build in hooks created by rtk query   
-export const { useCreateCourseMutation, useGetAllCoursesQuery, useEditCourseMutation, useGetCourseByIdQuery, useCreateLecturesMutation, useGetAllLecturesQuery, useEditLectureMutation, useGetLectureByIdQuery, useRemoveLectureMutation,usePublishCourseMutation,useGetPublishCourseQuery,useRemoveCourseMutation } = courseApi;
+export const { useCreateCourseMutation, useGetAllCoursesQuery, useEditCourseMutation, useGetCourseByIdQuery, useCreateLecturesMutation, useGetAllLecturesQuery, useEditLectureMutation, useGetLectureByIdQuery, useRemoveLectureMutation,usePublishCourseMutation,useGetPublishCourseQuery,useRemoveCourseMutation ,useGetPurchaseCourseQuery} = courseApi;

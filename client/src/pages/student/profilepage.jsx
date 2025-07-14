@@ -7,6 +7,7 @@ import {
 import EditProfile from './EditProfile';
 import { toast } from 'sonner'
 import { useLoaduserQuery} from '@/features/api/authApi';
+import UnauthorizedAccess from '@/components/UnauthorizedAccess';
 
 
 const ProfilePage = () => {
@@ -28,7 +29,8 @@ const ProfilePage = () => {
       github: 'https://github.com/johndoe'
     }
   });
-  const { data, isLoading, refetch } = useLoaduserQuery();
+  const { data, isLoading,error, refetch } = useLoaduserQuery();
+  console.log("error",error?.data?.message)
 
   const handleEditProfile = () => {
     setIsEditing(true);
@@ -60,6 +62,9 @@ const ProfilePage = () => {
     refetch();
   }, [data]); // Only depend on data changes
   // console.log(data);
+  if (error?.data?.message) {
+    return <UnauthorizedAccess />;
+  }
   if(isLoading){ 
     return <h1>profile is Loading</h1>
   }

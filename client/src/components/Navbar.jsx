@@ -67,8 +67,6 @@ function Navbar() {
   const { isAuthenticated } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
-  console.log(userData);
-  console.log(isAuthenticated)
 
   const handleLogout = async () => {
     try {

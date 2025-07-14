@@ -7,9 +7,9 @@ import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { FiBook } from 'react-icons/fi';
 
 const Login = () => {
+  const [isLogin, setIsLogin] = useState(true); // <-- Add this
   const location = useLocation();
   const navigate = useNavigate();
-  const isLogin = location.pathname === "/login";
   
   const [signupInput, setSignupInput] = useState({
     name: "",

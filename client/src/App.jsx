@@ -36,6 +36,10 @@ const appRouter = createBrowserRouter([
         path: "course/:courseId",
         element: <CourseContent />
       },
+      {
+        path: "/course-progress/:courseId",
+        element: <EnrolledCourseLectures />
+      },
 
 
       // Admin Routes

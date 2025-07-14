@@ -207,8 +207,10 @@ export const getAllLectures = async (req, res) => {
 }
 export const editLecture = async (req, res) => {
     try {
-        const { lectureTitle, secure_url, ispreview, public_id } = req.body;
-        console.log(secure_url)
+        const { lectureTitle, secure_url, isPreviewFree, public_id } = req.body;
+        console.log("debug",isPreviewFree);
+        console.log(req.body);
+
         const lectureId = req.params.lectureID;
 
         if (!lectureId) {
@@ -219,12 +221,12 @@ export const editLecture = async (req, res) => {
         if (!lecture) {
             return res.status(404).json({ message: "Lecture not found." });
         }
-
+          
         lecture.lectureTitle = lectureTitle || lecture.lectureTitle;
-        lecture.videoUrl = secure_url || lecture.secure_url;
+        lecture.videoUrl = secure_url || lecture.videoUrl;
         lecture.publicID = public_id || lecture.publicID;
-        lecture.isPreview = ispreview !== undefined ? ispreview : lecture.isPreview;
-
+        lecture.isPreviewFree = isPreviewFree !== undefined ? isPreviewFree : lecture.isPreviewFree;
+       
         await lecture.save();
 
         const course = await Course.findOne({ lectures: lectureId });
@@ -246,12 +248,12 @@ export const editLecture = async (req, res) => {
 export const getLectureById = async (req, res) => {
     try {
         const lectureId = req.params.lectureID;
-        const courseId = req.params.courseID;
 
         if (!lectureId) {
             return res.status(400).json({ message: "Lecture ID is required." });
         }
         const lecture = await Lecture.findById(lectureId);
+       
         if (!lecture) {
             return res.status(404).json({ message: "Lecture not found." });
         }
@@ -268,7 +270,9 @@ export const removeLecture = async (req, res) => {
     try {
         const { lectureID } = req.params;
         const lecture = await Lecture.findByIdAndDelete(lectureID);
-        console.log(lecture);
+
+
+        
         if (!lecture) {
             return res.status(404).json({ message: "Lecture not found." });
         }
@@ -295,7 +299,6 @@ export const removeLecture = async (req, res) => {
         res.status(500).json({ message: "failed to remove lecture" });
     }
 }
-
 export const publishCourse = async (req, res) => {
     try {
         const { courseID } = req.params;

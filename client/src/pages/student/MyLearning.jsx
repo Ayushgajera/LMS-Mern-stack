@@ -1,146 +1,140 @@
-import React, { useState } from 'react';
-import { motion } from 'framer-motion';
-import { FiClock, FiBook, FiBarChart, FiPlayCircle, FiList, FiGrid } from 'react-icons/fi';
+import React, { useState, useEffect } from 'react';
+import Course from './Course';
+import { useLoaduserQuery } from '@/features/api/authApi';
+
+const TABS = [
+  { key: 'all', label: 'All Courses' },
+  { key: 'inProgress', label: 'In Progress' },
+  { key: 'completed', label: 'Completed' },
+  { key: 'notStarted', label: 'Not Started' },
+];
 
 function MyLearning() {
-  const [viewMode, setViewMode] = useState('grid');
-  const [activeFilter, setActiveFilter] = useState('all');
+  const [coursesByStatus, setCoursesByStatus] = useState({
+    completed: [],
+    inProgress: [],
+    notStarted: [],
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState('all');
+  const [fetchError, setFetchError] = useState(null);
 
-  const courses = [
-    {
-      id: 1,
-      title: 'Complete Web Development Bootcamp',
-      instructor: 'Dr. Sarah Johnson',
-      thumbnail: 'https://images.unsplash.com/photo-1587620962725-abab7fe55159',
-      progress: 45,
-      lastAccessed: '2024-03-20',
-      totalHours: 52,
-      completedHours: 23.4,
-      category: 'Development'
-    },
-    // Add more courses as needed
+  const { data: userData, isLoading: isLoadingUser, error: userError } = useLoaduserQuery();
+  const user = userData?.user || {};
+  const enrolledCourseIds = user.enrolledCourses || [];
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      setIsLoading(true);
+      setFetchError(null);
+      const completed = [];
+      const inProgress = [];
+      const notStarted = [];
+
+      try {
+        await Promise.all(
+          enrolledCourseIds.map(async (courseId) => {
+            try {
+              // Fetch course details
+              const courseRes = await fetch(`http://localhost:8000/api/v1/course/${courseId}`, { credentials: 'include' });
+              if (!courseRes.ok) throw new Error('Failed to fetch course');
+              const courseData = await courseRes.json();
+              const course = courseData.course;
+              if (!course) throw new Error('Course not found');
+
+              // Fetch progress
+              const progressRes = await fetch(`http://localhost:8000/api/v1/progress/${courseId}`, { credentials: 'include' });
+              if (!progressRes.ok) throw new Error('Failed to fetch progress');
+              const progressData = await progressRes.json();
+              const progress = progressData.data;
+
+              // Categorize
+              if (progress?.completed) {
+                completed.push(course);
+              } else if (progress?.progress?.length > 0) {
+                inProgress.push(course);
+              } else {
+                notStarted.push(course);
+              }
+            } catch (err) {
+              // Skip this course, but log error
+              console.error(`Error loading course or progress for courseId ${courseId}:`, err);
+            }
+          })
+        );
+        setCoursesByStatus({ completed, inProgress, notStarted });
+      } catch (err) {
+        setFetchError('Failed to load some or all courses. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    if (enrolledCourseIds.length > 0) fetchAll();
+    else setIsLoading(false);
+  }, [enrolledCourseIds]);
+
+  if (isLoadingUser) {
+    return <div className="text-center text-gray-500 py-16">Loading user...</div>;
+  }
+  if (userError) {
+    return <div className="text-center text-red-500 py-16">Failed to load user data.</div>;
+  }
+
+  // Gather all courses for the 'All Courses' tab
+  const allCourses = [
+    ...coursesByStatus.completed,
+    ...coursesByStatus.inProgress,
+    ...coursesByStatus.notStarted,
   ];
 
   return (
     <div className="min-h-screen bg-gray-50 mt-10">
-      {/* Header Section */}
-      <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <h1 className="text-3xl font-bold text-gray-900">My Learning</h1>
-        </div>
-      </div>
-
-      {/* Filters and View Toggle */}
-      <div className="bg-white border-b sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            {/* Category Filters */}
-            <div className="flex items-center gap-2 overflow-x-auto pb-2">
-              {['all', 'in-progress', 'not-started', 'completed'].map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setActiveFilter(filter)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap
-                    ${activeFilter === filter 
-                      ? 'bg-purple-100 text-purple-700' 
-                      : 'text-gray-600 hover:bg-gray-100'
-                    }`}
-                >
-                  {filter.split('-').map(word => 
-                    word.charAt(0).toUpperCase() + word.slice(1)
-                  ).join(' ')}
-                </button>
-              ))}
-            </div>
-
-            {/* View Toggle */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 rounded-lg ${
-                  viewMode === 'grid' ? 'bg-gray-100 text-gray-900' : 'text-gray-600'
-                }`}
-              >
-                <FiGrid className="w-5 h-5" />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 rounded-lg ${
-                  viewMode === 'list' ? 'bg-gray-100 text-gray-900' : 'text-gray-600'
-                }`}
-              >
-                <FiList className="w-5 h-5" />
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Course Grid */}
       <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className={`grid gap-6 ${
-          viewMode === 'grid' 
-            ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' 
-            : 'grid-cols-1'
-        }`}>
-          {courses.map(course => (
-            <motion.div
-              key={course.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">My Learning</h1>
+        <div className="flex gap-4 mb-8">
+          {TABS.map(tab => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`px-4 py-2 rounded-full font-medium transition ${
+                activeTab === tab.key
+                  ? 'bg-blue-700 text-white'
+                  : 'bg-gray-200 text-gray-700 hover:bg-blue-100'
+              }`}
             >
-              {/* Course Thumbnail */}
-              <div className="relative aspect-video">
-                <img 
-                  src={course.thumbnail}
-                  alt={course.title}
-                  className="w-full h-full object-cover rounded-t-lg"
-                />
-                <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-200">
-                  <button className="p-3 bg-white rounded-full text-purple-600 hover:bg-purple-50 transition-colors duration-200">
-                    <FiPlayCircle className="w-6 h-6" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Course Info */}
-              <div className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
-                  {course.title}
-                </h3>
-                <p className="text-sm text-gray-600 mb-4">
-                  {course.instructor}
-                </p>
-
-                {/* Progress Bar */}
-                <div className="mb-4">
-                  <div className="flex justify-between text-sm text-gray-600 mb-1">
-                    <span>{course.progress}% complete</span>
-                    <span>{course.completedHours}/{course.totalHours} hrs</span>
-                  </div>
-                  <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div 
-                      className="h-full bg-purple-600 rounded-full"
-                      style={{ width: `${course.progress}%` }}
-                    />
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">
-                    Last accessed: {new Date(course.lastAccessed).toLocaleDateString()}
-                  </span>
-                  <button className="px-4 py-2 bg-purple-600 text-white text-sm font-medium rounded-lg 
-                    hover:bg-purple-700 transition-colors duration-200">
-                    Continue
-                  </button>
-                </div>
-              </div>
-            </motion.div>
+              {tab.label}
+            </button>
           ))}
         </div>
+        {isLoading ? (
+          <div className="text-center text-gray-500 py-16">Loading courses...</div>
+        ) : fetchError ? (
+          <div className="text-center text-red-500 py-16">{fetchError}</div>
+        ) : enrolledCourseIds.length === 0 ? (
+          <div className="text-center text-gray-500 py-16">You are not enrolled in any courses yet.</div>
+        ) : (
+          <Section
+            title={TABS.find(t => t.key === activeTab).label}
+            courses={activeTab === 'all' ? allCourses : coursesByStatus[activeTab]}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+function Section({ title, courses }) {
+  if (!courses.length) return (
+    <div className="text-center text-gray-500 py-16">No courses in {title}.</div>
+  );
+  return (
+    <div className="mb-10">
+      <h2 className="text-xl font-semibold mb-4">{title}</h2>
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        {courses.map((course) => (
+          <Course course={course} key={course._id} isPurchased={true} />
+        ))}
       </div>
     </div>
   );

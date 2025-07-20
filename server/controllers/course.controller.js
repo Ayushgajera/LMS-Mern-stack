@@ -161,6 +161,7 @@ export const createLectures = async (req, res) => {
     try {
         const courseId = req.params.courseID;
         const { lectureTitle } = req.body;
+        console.log(lectureTitle)
         if (!courseId) {
             return res.status(400).json({ message: "Course ID is required." });
         }
@@ -183,7 +184,7 @@ export const createLectures = async (req, res) => {
         });
     } catch (error) {
         console.error("Error creating lecture:", error);
-        res.status(500).json({ message: "Internal server error" });
+        res.status(500).json({ message: "lecture create error" });
     }
 }
 export const getAllLectures = async (req, res) => {
@@ -303,9 +304,17 @@ export const publishCourse = async (req, res) => {
     try {
         const { courseID } = req.params;
         const { publish } = req.query; // true or false
-        const course = await Course.findById(courseID);
+        const course = await Course.findById(courseID).populate('lectures');
         if (!course) {
             return res.status(404).json({ message: "Course not found." });
+        }
+        // Enforce at least 2 lectures before publishing
+        if (publish === "true" && (!course.lectures || course.lectures.length < 2)) {
+            return res.status(400).json({ message: "A course must have at least 2 lectures before publishing." });
+        }
+        // Enforce every lecture has a videoUrl before publishing
+        if (publish === "true" && course.lectures.some(lec => !lec.videoUrl)) {
+            return res.status(400).json({ message: "Each lecture must have a video before publishing the course." });
         }
         course.ispublished = publish === "true";
         await course.save();
@@ -326,16 +335,15 @@ export const publishCourse = async (req, res) => {
 }
 export const getPublishCourse = async (req, res) => {
     try {
-        const courses = await Course.find({ ispublished: true }).populate("creator", "name email photoUrl");
-        console.log(courses);
-
-        if (courses.length === 0) {
-            return res.status(404).json({ message: "No published courses found." });
-        }
+        // Remove .populate("user") as 'user' is not a valid path in the Course schema
+        const courses = await Course.find({ ispublished: true })
+            .populate("creator", "name email photoUrl");
 
         return res.status(200).json({
             courses,
-            message: "Published courses fetched successfully"
+            message: courses.length === 0
+                ? "No published courses found."
+                : "Published courses fetched successfully"
         });
     } catch (error) {
         console.error("Error fetching published courses:", error);

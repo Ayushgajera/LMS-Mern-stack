@@ -14,6 +14,9 @@ import CreateLectures from "./pages/admin/lecture/CreateLectures"
 import EditLecture from "./pages/admin/lecture/EditLecture"
 import CourseContent from "./pages/course/CourseContent"
 import EnrolledCourseLectures from "./pages/student/EnrolledCourseLectures"
+import Homepage from "./pages/homepage"
+import CertificateDownloadDemo from "./pages/student/CertificateDemo"
+import CertificateDemo from "./pages/student/CertificateDemo"
 
 const appRouter = createBrowserRouter([
   {
@@ -22,7 +25,7 @@ const appRouter = createBrowserRouter([
     children: [
       {
         path: "/",
-        element: <HeroSection />
+        element: < Homepage/>
       },
       {
         path: "profile",
@@ -91,6 +94,10 @@ const appRouter = createBrowserRouter([
     path: "/enrolled/lectures",
     element: <EnrolledCourseLectures />
   },
+  {
+    path:"/certificate",
+    element:<CertificateDemo />
+  }
 
 ]);
 function App() {

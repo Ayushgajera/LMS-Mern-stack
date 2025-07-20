@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import crypto from "node:crypto";
 import { PurchaseCourse } from "../models/purchaseCourse.model.js";
 import { Course } from "../models/course.model.js";
+import { User } from "../models/user.model.js"
 
 dotenv.config();
 
@@ -81,6 +82,7 @@ export const verifyPayment = async (req, res) => {
             return res.status(400).json({ error: "Invalid signature" });
         }
 
+        // 💳 Save purchase record
         const purchase = new PurchaseCourse({
             courseId,
             userId,
@@ -91,9 +93,17 @@ export const verifyPayment = async (req, res) => {
 
         await purchase.save();
 
+        // ✅ Enroll user in course
+        const user = await User.findById(userId);
+
+        if (!user.enrolledCourses.includes(courseId)) {
+            user.enrolledCourses.push(courseId);
+            await user.save();
+        }
+
         res.json({
             success: true,
-            message: "Payment verified and purchase saved",
+            message: "Payment verified, course enrolled, and purchase saved",
             purchase,
         });
     } catch (err) {
@@ -101,6 +111,7 @@ export const verifyPayment = async (req, res) => {
         res.status(500).json({ error: "Server error during verification" });
     }
 };
+
 export const getUserPurchases = async (req, res) => {
     // Accept courseId and userId from query or params for flexibility
     const courseId = req.query.courseId || req.params.courseId;

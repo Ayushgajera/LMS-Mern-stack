@@ -1,41 +1,52 @@
 import CourseProgress from "../models/courseProgress.model.js";
 import { Course } from "../models/course.model.js";
+import { User } from "../models/user.model.js"
 
 export const getCourseProgress = async (req, res) => {
     try {
-        const { courseId } = req.params;
-        const userId = req.id;
-        let courseProgress = await CourseProgress.findOne({ userId, courseId }).populate("courseId");
-
-        const courseDetails = await Course.findById(courseId).populate("lectures");
-        if (!courseDetails) {
-            return res.status(404).json({ message: "Course not found" });
-        }
-
-        // if no progress found, return course details with empty progress 
-        if (!courseProgress) {
-            return res.status(200).json({
-                data: {
-                    courseDetails,
-                    progress: [],
-                    completed: false
-                }
-            });
-        }
-        // return the user course progress along with course details
-
+      const { courseId } = req.params;
+      const userId = req.id;
+  
+      // 🔐 Check if user is enrolled in the course
+      const user = await User.findById(userId);
+      const hasEnrolled = user.enrolledCourses.some(
+        (enrolledId) => enrolledId.toString() === courseId
+      );
+  
+      if (!hasEnrolled) {
+        return res.status(403).json({ message: "Access denied. Please enroll in the course." });
+      }
+  
+      // ✅ Fetch course progress
+      let courseProgress = await CourseProgress.findOne({ userId, courseId }).populate("courseId");
+  
+      const courseDetails = await Course.findById(courseId).populate("lectures");
+      if (!courseDetails) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+  
+      if (!courseProgress) {
         return res.status(200).json({
-            data: {
-                courseDetails,
-                progress: courseProgress.lectureProgress,
-                completed: courseProgress.completed
-            }
+          data: {
+            courseDetails,
+            progress: [],
+            completed: false,
+          },
         });
+      }
+  
+      return res.status(200).json({
+        data: {
+          courseDetails,
+          progress: courseProgress.lectureProgress,
+          completed: courseProgress.completed,
+        },
+      });
     } catch (error) {
-        console.error("Error fetching course progress:", error);
-        res.status(500).json({ message: "Internal server error" });
+      console.error("Error fetching course progress:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
-};
+  };
 
 export const updateCourseProgress = async (req, res) => {
     try {

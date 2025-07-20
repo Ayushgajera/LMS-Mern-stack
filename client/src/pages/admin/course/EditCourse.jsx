@@ -49,7 +49,15 @@ function EditCourse() {
       toast.success("Course updated successfully!");
       refetch();
     } catch (error) {
-      toast.error("Failed to update course. Please try again.");
+      const backendMsg = error?.data?.message;
+      if (
+        backendMsg === "A course must have at least 2 lectures before publishing." ||
+        backendMsg === "Each lecture must have a video before publishing the course."
+      ) {
+        toast.error(backendMsg);
+      } else {
+        toast.error("Failed to update course. Please try again.");
+      }
       console.error("Edit Course Error:", error);
     }
   }

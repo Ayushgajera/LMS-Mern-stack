@@ -3,7 +3,7 @@ import HeroSection from "./pages/student/herosection"
 import ProfilePage from "./pages/student/profilepage"
 import MainLayout from "./layout/MainLayout"
 import { createBrowserRouter } from "react-router-dom"
-import { RouterProvider } from "react-router"
+import { RouterProvider, useNavigate } from "react-router"
 import MyLearning from "./pages/student/MyLearning"
 import AdminLayout from "./pages/admin/AdminLayout"
 import Dashboard from "./pages/admin/Dashbaord"
@@ -15,8 +15,13 @@ import EditLecture from "./pages/admin/lecture/EditLecture"
 import CourseContent from "./pages/course/CourseContent"
 import EnrolledCourseLectures from "./pages/student/EnrolledCourseLectures"
 import Homepage from "./pages/homepage"
-import CertificateDownloadDemo from "./pages/student/CertificateDemo"
 import CertificateDemo from "./pages/student/CertificateDemo"
+import BecomeInstructor from "./pages/student/BecomeInstructor"
+import RoleRoute from "./extensions/RoleRoute"
+import UnauthorizedAccess from "./components/UnauthorizedAccess"
+import { useDispatch } from "react-redux"
+import { fetchUser } from "./features/authslice"
+import { useEffect } from "react"
 
 const appRouter = createBrowserRouter([
   {
@@ -28,12 +33,20 @@ const appRouter = createBrowserRouter([
         element: < Homepage/>
       },
       {
+        path: "/unauthorized",
+        element: < UnauthorizedAccess/>
+      },
+      {
+        path: "/become-instructor",
+        element: <RoleRoute allowedRole="student"><BecomeInstructor /></RoleRoute>
+      },
+      {
         path: "profile",
-        element: <ProfilePage />
+        element: <RoleRoute allowedRole="student"><ProfilePage /></RoleRoute>
       },
       {
         path: "my-courses",
-        element: <MyLearning />
+        element: <RoleRoute allowedRole="student"><MyLearning /></RoleRoute>
       },
       {
         path: "course/:courseId",
@@ -41,8 +54,9 @@ const appRouter = createBrowserRouter([
       },
       {
         path: "/course-progress/:courseId",
-        element: <EnrolledCourseLectures />
+        element: <RoleRoute allowedRole="student"><EnrolledCourseLectures /></RoleRoute>
       },
+      
 
 
       // Admin Routes
@@ -52,27 +66,27 @@ const appRouter = createBrowserRouter([
         children: [
           {
             path: "dashboard",
-            element: <Dashboard />
+            element: <RoleRoute allowedRole="instructor"><Dashboard /></RoleRoute>
           },
           {
             path: "courses",
-            element: <CourseTable />
+            element: <RoleRoute allowedRole="instructor"><CourseTable /></RoleRoute>
           },
           {
             path: "courses/create",
-            element: <AddCourse />
+            element: <RoleRoute allowedRole="instructor"><AddCourse /></RoleRoute>
           },
           {
             path: "courses/edit/:courseId",
-            element: <EditCourse />
+            element: <RoleRoute allowedRole="instructor"><EditCourse /></RoleRoute>
           },
           {
             path: "courses/edit/:courseId/lectures",
-            element: <CreateLectures />
+            element: <RoleRoute allowedRole="instructor"><CreateLectures /></RoleRoute>
           },
           {
             path: "courses/edit/:courseId/lectures/:lectureId",
-            element: <EditLecture />
+            element: <RoleRoute allowedRole="instructor"><EditLecture /></RoleRoute>
           },
         ]
 
@@ -100,8 +114,17 @@ const appRouter = createBrowserRouter([
   }
 
 ]);
+
+
+
+
 function App() {
 
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(fetchUser()); // Auto-login after refresh
+  }, [dispatch]);
   return (
     <>
       <main>

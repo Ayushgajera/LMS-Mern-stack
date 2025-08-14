@@ -1,4 +1,4 @@
-import { useGetPurchaseCourseQuery } from '@/features/api/courseApi';
+
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   FiPlayCircle, FiCheckCircle, FiUser, FiClock, FiBookOpen, FiChevronDown,
@@ -9,6 +9,7 @@ import DOMPurify from 'dompurify';
 import { socket } from '../../extensions/socket';
 import BuyCourseButton from '@/components/BuyCourseButton';
 import UnauthorizedAccess from '@/components/UnauthorizedAccess';
+import { useGetPurchaseCourseQuery } from '@/features/api/paymentApi';
 // import Loader from '@/components/Loader'; // Uncomment if you have a Loader component
 
 function CourseContent() {
@@ -51,6 +52,7 @@ function CourseContent() {
   const lectures = useMemo(() => Array.isArray(courseData.lectures) ? courseData.lectures : [], [courseData.lectures]);
 
   useEffect(() => {
+    refetch();
     // Listen for course updates
     function handleCourseUpdated(updatedCourse) {
       if (updatedCourse._id === courseId) {
@@ -271,12 +273,13 @@ function CourseContent() {
               <div className="text-sm text-gray-500 line-through mb-4">₹{defaultCourse.price}</div>
 
               <div className="flex flex-col gap-2">
-                {/* Only show BuyCourseButton if NOT purchased */}
-                {!purchased && (
+                {/* ✅ Wait until not loading before deciding */}
+                {!isLoading && purchased === false && (
                   <BuyCourseButton courseId={courseData._id} refetch={refetch} />
                 )}
-                {/* Optionally, show a message or something else if purchased */}
-                {purchased && (
+
+                {/* ✅ Show Continue if purchased */}
+                {!isLoading && purchased === true && (
                   <button
                     onClick={() => navigate(`/course-progress/${courseData._id}`)}
                     className="bg-green-200 text-green-700 py-2 rounded font-medium flex items-center justify-center gap-2 hover:bg-green-300 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -284,13 +287,15 @@ function CourseContent() {
                     <FiCheckCircle /> Continue
                   </button>
                 )}
-                <button className="border border-purple-700 text-purple-700 py-2 rounded font-medium hover:bg-purple-50 flex items-center justify-center gap-2" onClick={() => {/* TODO: Implement wishlist */}}>
+
+                <button className="border border-purple-700 text-purple-700 py-2 rounded font-medium hover:bg-purple-50 flex items-center justify-center gap-2">
                   <FiHeart /> Wishlist
                 </button>
-                <button className="bg-gray-100 text-gray-800 py-2 rounded font-medium hover:bg-gray-200" onClick={() => {/* TODO: Implement share */}}>
+                <button className="bg-gray-100 text-gray-800 py-2 rounded font-medium hover:bg-gray-200">
                   Share
                 </button>
               </div>
+
 
               <p className="text-center text-sm mt-3 text-gray-500">30-Day Money-Back Guarantee</p>
               <ul className="mt-4 space-y-3 text-sm text-gray-700">

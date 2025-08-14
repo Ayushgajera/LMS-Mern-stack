@@ -9,8 +9,11 @@ import { socket } from '../../extensions/socket'; // ✅ Import socket connectio
 const Courses = () => {
   const { data, isSuccess, isLoading, isError, refetch } = useGetPublishCourseQuery();
   const courses = data?.courses || [];
-  const { data: userData } = useLoaduserQuery();
+   const { data: userData } = useLoaduserQuery(undefined, {
+    refetchOnMountOrArgChange: true,
+  });
   const user = userData?.user || {};
+  
   const enrolledCourseIds = user.enrolledCourses || [];
 
   const [viewMode, setViewMode] = useState('grid');
@@ -19,6 +22,7 @@ const Courses = () => {
 
   // ✅ Real-time course update listener
   useEffect(() => {
+    refetch();
     const handleCourseUpdated = () => {
       refetch();
     };

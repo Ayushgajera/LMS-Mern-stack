@@ -1,8 +1,8 @@
 import jwt from "jsonwebtoken"
 
 export const generateToken = async (res, user, message) => {
-
-    const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, { expiresIn: "7d" });
+    console.log(user)
+    const token = jwt.sign({ userId: user._id ,role:user.role}, process.env.SECRET_KEY, { expiresIn: "7d" });
     res.status(200)
         .cookie("token", token, {
             httpOnly: true,

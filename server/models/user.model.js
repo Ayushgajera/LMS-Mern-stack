@@ -29,7 +29,15 @@ const userSchema = new mongoose.Schema({
         type:String,
         default:"",
 
-    }
+    },
+    onboardedAsInstructor: {
+      type: Boolean,
+      default: false,
+    },
+    instructorOnboardingAnswers: {
+      type: [String], // or [{question: String, answer: String}] for more detail
+      default: [],
+    },
 },{timestamps: true},);
 
 

@@ -8,6 +8,7 @@ import EditProfile from './EditProfile';
 import { toast } from 'sonner'
 import { useLoaduserQuery} from '@/features/api/authApi';
 import UnauthorizedAccess from '@/components/UnauthorizedAccess';
+import Cookies from 'js-cookie';
 
 
 const ProfilePage = () => {
@@ -30,8 +31,7 @@ const ProfilePage = () => {
     }
   });
   const { data, isLoading,error, refetch } = useLoaduserQuery();
-  console.log("error",error?.data?.message)
-
+  // const token = Cookies.get('token');
   const handleEditProfile = () => {
     setIsEditing(true);
   };

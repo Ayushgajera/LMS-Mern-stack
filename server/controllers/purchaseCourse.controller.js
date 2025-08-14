@@ -115,7 +115,7 @@ export const verifyPayment = async (req, res) => {
 export const getUserPurchases = async (req, res) => {
     // Accept courseId and userId from query or params for flexibility
     const courseId = req.query.courseId || req.params.courseId;
-    const userId =req.id;
+    const userId = req.id;
     console.log(courseId,userId)
 
     // Validate ObjectIds

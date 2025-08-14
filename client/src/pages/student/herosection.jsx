@@ -1,6 +1,9 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiArrowDownCircle, FiUsers, FiBookOpen, FiAward, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { useSelector } from 'react-redux';
 
 const stats = [
   { label: 'Students', value: '12,000+', icon: <FiUsers className="text-emerald-600 w-6 h-6" /> },
@@ -59,6 +62,9 @@ const HeroSection = ({ search, setSearch, filteredCourses }) => {
   const [isFocused, setIsFocused] = useState(false);
   const [activeIdx, setActiveIdx] = useState(-1);
   const inputRef = useRef();
+  const navigate = useNavigate();
+  const user = useSelector((state) => state.auth.user);
+  // console.log("User in HeroSection:", user.role);
 
   // Only use backend courses for suggestions
   const filteredCourseSuggestions = search.trim()
@@ -228,9 +234,15 @@ const HeroSection = ({ search, setSearch, filteredCourses }) => {
               <FiArrowDownCircle className="w-6 h-6" />
               Explore Courses
             </button>
-            <button className="px-6 py-3 bg-white text-emerald-700 border border-emerald-600 rounded-xl font-bold shadow hover:bg-emerald-50 transition text-lg">
-              Become an Instructor
-            </button>
+           {user?.role !== "instructor" && (
+        <button
+          onClick={() => navigate("/become-instructor")}
+          className="px-6 py-3 bg-white text-emerald-700 border border-emerald-600 rounded-xl font-bold shadow hover:bg-emerald-50 transition text-lg"
+        >
+          Become an Instructor
+        </button>
+      )}
+
           </div>
         </div>
         {/* Right: Hero Image & Floating Stats */}

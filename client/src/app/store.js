@@ -5,6 +5,7 @@ import rootreducer from "./rootReducer";
 import { authApi } from "@/features/api/authApi";
 import { courseApi } from "@/features/api/courseApi";
 import { courseProgressApi } from "@/features/api/courseProgressApi";
+import { paymentApi } from "@/features/api/paymentApi";
 
 
 const persistConfig = {
@@ -25,7 +26,8 @@ export const appStore = configureStore({
       }).concat([
         authApi.middleware,
         courseApi.middleware,
-        courseProgressApi.middleware
+        courseProgressApi.middleware,
+        paymentApi.middleware 
       ]),
 });
 

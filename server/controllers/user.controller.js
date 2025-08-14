@@ -77,8 +77,8 @@ export const logout = async (_, res) => {
     try {
         res.clearCookie("token", {
             httpOnly: true,
-            secure: true, 
-            sameSite: "Strict", 
+            secure: true,
+            sameSite: "Strict",
         });
         return res.status(200).json({
             success: true,
@@ -95,9 +95,9 @@ export const logout = async (_, res) => {
 
 export const getUserProfile = async (req, res) => {
     try {
-        const userId=req.id;
-        const user= await User.findById(userId).select("-password");
-        if(!user){
+        const userId = req.id;
+        const user = await User.findById(userId).select("-password");
+        if (!user) {
             return res.status(404).json({
                 success: false,
                 message: "User not found"
@@ -108,7 +108,7 @@ export const getUserProfile = async (req, res) => {
             user
         });
     } catch (error) {
-        console.log(error);``
+        console.log(error); ``
         return res.status(500).json({
             success: false,
             message: "failed to logout"
@@ -120,8 +120,8 @@ export const updateUserProfile = async (req, res) => {
         const userId = req.id;
         const { name, email } = req.body;
         const profilephoto = req.file;
-         console.log(req.file); // make sure file is received
-  console.log(req.body);
+        console.log(req.file); // make sure file is received
+        console.log(req.body);
 
         const user = await User.findById(userId);
         if (!user) {
@@ -146,7 +146,7 @@ export const updateUserProfile = async (req, res) => {
 
                 // Upload new photo
                 const cloudResponse = await uploadMedia(profilephoto.path);
-                
+
                 updatedUser.photoUrl = cloudResponse.secure_url;
 
             } catch (uploadError) {
@@ -178,3 +178,59 @@ export const updateUserProfile = async (req, res) => {
         });
     }
 };
+
+export const setInstructorOnboarded = async (req, res) => {
+    try {
+        const userId = req.id; // from auth middleware
+        const { answers } = req.body;
+
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: "User not found" });
+
+        user.onboardedAsInstructor = true;
+        user.instructorOnboardingAnswers = answers;
+
+        // 🔥 Promote to instructor role
+        user.role = 'instructor';
+
+        await user.save();
+
+        res.json({ success: true, role: user.role });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: "Failed to save onboarding answers" });
+    }
+};
+
+
+export const getInstructorOnboarded = async (req, res) => {
+    try {
+        const userId = req.id;
+        const user = await User.findById(userId);
+        if (!user) return res.status(404).json({ message: "User not found" });
+        res.json({ onboarded: !!user.onboardedAsInstructor });
+    } catch (err) {
+        res.status(500).json({ message: "Failed to fetch onboarding status" });
+    }
+};
+
+export const revertToStudent = async (req, res) => {
+    try {
+      const userId = req.id; // from auth middleware
+      const user = await User.findById(userId);
+      if (!user) return res.status(404).json({ message: "User not found" });
+  
+      // Revert role
+      user.role = 'student';
+      user.onboardedAsInstructor = false;
+      user.instructorOnboardingAnswers = [];
+  
+      await user.save();
+  
+      res.json({ success: true, role: user.role });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ message: "Failed to revert to student role" });
+    }
+  };
+  

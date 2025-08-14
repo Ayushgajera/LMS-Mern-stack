@@ -26,25 +26,30 @@ const BuyCourseButton = ({ courseId, amount = 499 ,refetch}) => {
 
   // 💸 Main Payment Handler
   const handlePayment = async () => {
+    if (!amount || !courseId) {
+      toast.error("Missing course or amount details.");
+      return;
+    }
+  
     setLoading(true);
-
+  
     const res = await loadRazorpay();
     if (!res) {
       alert("Razorpay SDK failed to load");
       setLoading(false);
       return;
     }
-
+  
     try {
       // Step 1️⃣: Create order from backend
       const { data: orderData } = await axios.post("http://localhost:8000/api/v1/payment/create-order", {
         amount,
-      });
+      },{ withCredentials: true });
 
       // Step 2️⃣: Setup Razorpay Options
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-        amount: orderData.amount * 100, // Razorpay expects amount in paise
+        amount: orderData.amount * 100, // paise
         currency: orderData.currency || "INR",
         name: "LMS by Ayush",
         description: "Course Access Payment",
@@ -57,38 +62,39 @@ const BuyCourseButton = ({ courseId, amount = 499 ,refetch}) => {
               razorpay_signature: response.razorpay_signature,
               courseId,
               amount,
-              userId: userId // 🔁 Replace with actual logged-in user ID
-            });
-
+              userId: userId || null, // ✅ If not logged in, backend should handle it
+            },{ withCredentials: true });
+  
             if (verifyRes.success) {
               toast.success("✅ Payment successful!");
-              refetch();
+              refetch(); // refresh course access
               navigate(`/course-progress/${courseId}`);
             } else {
               toast.error("❌ Payment verification failed!");
             }
           } catch (err) {
             toast.error("❌ Error verifying payment");
-            console.error(err);
+            console.error("Payment Verification Error:", err);
           }
         },
-
         theme: {
           color: "#10B981",
           backdrop_color: "rgba(0,0,0,0.6)",
           hide_topbar: false,
         },
       };
-
+  
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (error) {
-      alert("Something went wrong while creating order");
       console.error("Order Error:", error);
+      toast.error("❌ Failed to initiate order.");
+      navigate("/unauthorized");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
+  
 
   return (
     <button

@@ -3,10 +3,11 @@ import isAuthenticated from '../middleware/isAuthenticated.js';
 import { createCourse, createLectures, editCourse, editLecture, getAllCourses, getAllLectures, getCourseById, getLectureById, getPublishCourse, publishCourse, removeCourse, removeLecture } from '../controllers/course.controller.js';
 import upload from "../utils/multer.js";
 import { getUserPurchases } from '../controllers/purchaseCourse.controller.js';
+import { authorizeRoles } from '../middleware/authorizeRoles.js'
 
 const router = express.Router();
 
-router.route("/").post(isAuthenticated, createCourse);
+router.route("/").post(isAuthenticated,authorizeRoles("instructor"), createCourse);
 router.route("/publishCourse").get(getPublishCourse);
 router.route("/all").get(isAuthenticated, getAllCourses);
 router.route("/edit/:courseID").put(isAuthenticated, upload.single("courseThumbnail"), editCourse);
@@ -20,7 +21,7 @@ router.route("/:courseID/lectures").get(isAuthenticated, getAllLectures);
 router.route("/:courseID/lectures/:lectureID").put(isAuthenticated, editLecture);
 router.route("/:courseID/lectures/:lectureID").delete(isAuthenticated, removeLecture);
 router.route("/:courseID/lectures/:lectureID").get(isAuthenticated, getLectureById);
-router.route("/:courseId/purchase").get(isAuthenticated, getUserPurchases);
+router.route("/:courseId/purchase").get(getUserPurchases);
 
 
 

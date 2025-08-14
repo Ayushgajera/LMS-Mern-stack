@@ -1,6 +1,9 @@
 import jwt from 'jsonwebtoken';
+import { User } from '../models/user.model.js';
 
-const isAuthenticated = (req, res, next) => {
+const isAuthenticated = async(req, res, next) => {
+    
+
     try {
         const token= req.cookies.token || req.headers.authorization?.split(" ")[1];
         if(!token){
@@ -16,7 +19,17 @@ const isAuthenticated = (req, res, next) => {
                 message: "unauthorized  access denied"
             });
         }
-        req.id= decoded.userId;
+        const user = await User.findById(decoded.userId);
+        if (!user) {
+            console.log("userr not found")
+            return res.status(401).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+        req.id = decoded.userId;
+        req.role = user.role;
+       
         next();
 
     } catch (error) {

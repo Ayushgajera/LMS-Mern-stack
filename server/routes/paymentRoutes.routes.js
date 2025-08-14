@@ -2,6 +2,7 @@ import express from "express";
 import Razorpay from "razorpay";
 import dotenv from "dotenv";
 import { createPurchase, getUserPurchases, verifyPayment } from "../controllers/purchaseCourse.controller.js";
+import isAuthenticated from "../middleware/isAuthenticated.js";
 
 dotenv.config();
 const router = express.Router();
@@ -9,7 +10,7 @@ const router = express.Router();
 
 
 // Pass razorpay instance to controller via closure
-router.route("/create-order").post(createPurchase);
-router.route("/verify").post(verifyPayment);
-router.route("/:courseId/purchase").get(getUserPurchases);
+router.route("/create-order").post(isAuthenticated,createPurchase);
+router.route("/verify").post(isAuthenticated,verifyPayment);
+router.route("/:courseId/purchase").get(isAuthenticated,getUserPurchases);
 export default router;

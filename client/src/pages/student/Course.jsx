@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 function Course({ course, isPurchased }) {
   console.log(course);
   console.log(course?._id);
+  console.log(isPurchased);
   const navigate = useNavigate();
   return (
     <motion.div onClick={() => { navigate(`/course/${course._id}`) }}

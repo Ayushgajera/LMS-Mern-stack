@@ -8,12 +8,14 @@ import { Toaster } from './components/ui/sonner'
 import { useLoaduserQuery } from './features/api/authApi'
 import Loader from './components/Loader'
 
+
+
 const Custom = ({ children }) => {
   const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
   const user = useSelector(state => state.auth.user);
 
   const { isLoading } = useLoaduserQuery(undefined, {
-    skip: !isAuthenticated || !!user, 
+    skip: !isAuthenticated || !!user,
     refetchOnMountOrArgChange: true // Only refetch when component mounts or arguments change
   });
 
@@ -26,6 +28,7 @@ createRoot(document.getElementById('root')).render(
   <Provider store={appStore}>
     <PersistGate loading={<Loader />} persistor={persistor}>
       <Custom>
+        
         <App />
         <Toaster />
       </Custom>

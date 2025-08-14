@@ -20,7 +20,8 @@ export const getCourseProgress = async (req, res) => {
       // ✅ Fetch course progress
       let courseProgress = await CourseProgress.findOne({ userId, courseId }).populate("courseId");
   
-      const courseDetails = await Course.findById(courseId).populate("lectures");
+      const courseDetails = await Course.findById(courseId).populate("lectures").populate("creator");
+      console.log(courseDetails);
       if (!courseDetails) {
         return res.status(404).json({ message: "Course not found" });
       }

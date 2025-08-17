@@ -4,7 +4,7 @@ import dotenv from "dotenv";
 import crypto from "node:crypto";
 import { PurchaseCourse } from "../models/purchaseCourse.model.js";
 import { Course } from "../models/course.model.js";
-import { User } from "../models/user.model.js"
+import { User } from "../models/user.model.js";
 
 dotenv.config();
 
@@ -90,15 +90,26 @@ export const verifyPayment = async (req, res) => {
             status: "completed",
             paymentId: razorpay_payment_id,
         });
-
         await purchase.save();
 
-        // ✅ Enroll user in course
+        // ✅ Enroll user in course (updates the user's `enrolledCourses` array)
         const user = await User.findById(userId);
-
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
         if (!user.enrolledCourses.includes(courseId)) {
             user.enrolledCourses.push(courseId);
             await user.save();
+        }
+
+        // 🚀 Add student to the course's `enrolledStudents` array (new logic)
+        const course = await Course.findById(courseId);
+        if (!course) {
+            return res.status(404).json({ error: "Course not found" });
+        }
+        if (!course.enrolledStudents.includes(userId)) {
+            course.enrolledStudents.push(userId);
+            await course.save();
         }
 
         res.json({
@@ -116,7 +127,7 @@ export const getUserPurchases = async (req, res) => {
     // Accept courseId and userId from query or params for flexibility
     const courseId = req.query.courseId || req.params.courseId;
     const userId = req.id;
-    console.log(courseId,userId)
+    console.log(courseId, userId)
 
     // Validate ObjectIds
     if (!courseId || !userId) {
@@ -145,4 +156,3 @@ export const getUserPurchases = async (req, res) => {
         res.status(500).json({ error: "Server error fetching purchases" });
     }
 };
-

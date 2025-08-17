@@ -101,14 +101,7 @@ const HeroSection = ({ search, setSearch, filteredCourses }) => {
     setTimeout(() => setIsFocused(false), 100); // Delay to allow click
   };
 
-  const handleScrollToCourses = () => {
-    if (coursesRef.current) {
-      coursesRef.current.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      const el = document.getElementById('courses-section');
-      if (el) el.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -228,7 +221,7 @@ const HeroSection = ({ search, setSearch, filteredCourses }) => {
           </div>
           <div className="flex gap-4 mt-2">
             <button
-              onClick={handleScrollToCourses}
+              onClick={() => navigate("/courses")}
               className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-500 text-white rounded-xl font-bold shadow-lg hover:shadow-xl hover:shadow-green-200/50 hover:-translate-y-0.5 transition-all duration-200 text-lg"
             >
               <FiArrowDownCircle className="w-6 h-6" />

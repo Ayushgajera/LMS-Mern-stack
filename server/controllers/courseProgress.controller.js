@@ -54,6 +54,12 @@ export const updateCourseProgress = async (req, res) => {
         const { courseId, lectureId } = req.params;
         const userId = req.id;
 
+        // 1. Fetch the course to get the total number of lectures
+        const course = await Course.findById(courseId);
+        if (!course) {
+            return res.status(404).json({ message: "Course not found." });
+        }
+
         // Find or create course progress for the user
         let courseProgress = await CourseProgress.findOne({ userId, courseId });
 
@@ -68,19 +74,25 @@ export const updateCourseProgress = async (req, res) => {
         }
 
         // Find the lecture progress in the course progress
-        const lectureIndex = courseProgress.lectureProgress.findIndex(lp => lp.lectureId === lectureId);
+        const lectureIndex = courseProgress.lectureProgress.findIndex(lp => lp.lectureId.toString() === lectureId);
 
         if (lectureIndex !== -1) {
+            // Update an existing lecture progress record
             courseProgress.lectureProgress[lectureIndex].viewed = true;
         } else {
-            // Add new lecture progress
+            // Add a new lecture progress record
             courseProgress.lectureProgress.push({ lectureId, viewed: true });
         }
 
-        // Check if all lectures are viewed to mark the course as completed
-        // You may want to check against actual lectures in the course for a robust solution
-        const allLecturesViewed = courseProgress.lectureProgress.every(lp => lp.viewed);
-        if (allLecturesViewed) {
+        // 2. Fix the bug: Only mark as complete if ALL lectures have been viewed
+        const allLecturesViewed = 
+            course.lectures.length > 0 && // Ensure the course has at least one lecture
+            courseProgress.lectureProgress.length === course.lectures.length;
+            
+        // Final check to make sure all lectures in the progress array are viewed
+        const allMarkedViewed = courseProgress.lectureProgress.every(lp => lp.viewed);
+
+        if (allLecturesViewed && allMarkedViewed) {
             courseProgress.completed = true;
         }
 

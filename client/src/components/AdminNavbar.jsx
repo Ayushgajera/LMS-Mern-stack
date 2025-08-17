@@ -16,7 +16,7 @@ const menuItems = [
     bgColor: "bg-green-100"
   },
   {
-    to: "/my-courses",
+    to: "admin/dashboard",
     icon: <FiHome className="w-4 h-4 text-emerald-600" />,
     label: "Dashboard",
     bgColor: "bg-emerald-100",

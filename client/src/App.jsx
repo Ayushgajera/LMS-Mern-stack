@@ -22,6 +22,9 @@ import UnauthorizedAccess from "./components/UnauthorizedAccess"
 import { useDispatch } from "react-redux"
 import { fetchUser } from "./features/authslice"
 import { useEffect } from "react"
+import ExplorePage from "./pages/student/ExplorePage"
+import ManageUsers from "./pages/admin/ManageUsers"
+import Revenue from "./pages/admin/Revenue"
 
 const appRouter = createBrowserRouter([
   {
@@ -42,7 +45,7 @@ const appRouter = createBrowserRouter([
       },
       {
         path: "profile",
-        element: <RoleRoute allowedRole="student"><ProfilePage /></RoleRoute>
+        element: <ProfilePage />
       },
       {
         path: "my-courses",
@@ -55,6 +58,10 @@ const appRouter = createBrowserRouter([
       {
         path: "/course-progress/:courseId",
         element: <RoleRoute allowedRole="student"><EnrolledCourseLectures /></RoleRoute>
+      },
+      {
+        path: "/courses",
+        element: <ExplorePage />
       },
       
 
@@ -88,6 +95,14 @@ const appRouter = createBrowserRouter([
             path: "courses/edit/:courseId/lectures/:lectureId",
             element: <RoleRoute allowedRole="instructor"><EditLecture /></RoleRoute>
           },
+          {
+            path: "users",
+            element: <RoleRoute allowedRole="instructor"><ManageUsers /></RoleRoute>
+          },
+          {
+            path: "revenue",
+            element: <RoleRoute allowedRole="instructor"><Revenue /></RoleRoute>
+          }
         ]
 
       }
